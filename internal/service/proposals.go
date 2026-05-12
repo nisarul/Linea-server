@@ -9,25 +9,35 @@ import (
 	"github.com/nisarul/Linea-core/governance"
 	"github.com/nisarul/Linea-core/model"
 	"github.com/nisarul/Linea-core/store"
+	lerrors "github.com/nisarul/Linea-core/errors"
 
 	pb "github.com/nisarul/Linea-server/gen/go/linea/v1"
 	"github.com/nisarul/Linea-server/internal/auth"
-	"github.com/nisarul/Linea-server/internal/tenancy"
+	"github.com/nisarul/Linea-server/internal/platform"
 )
 
 // ProposalsService implements pb.ProposalsServer.
 type ProposalsService struct {
 	pb.UnimplementedProposalsServer
-	Store store.Store
+	resolver
+	proposalsDepsRef *platformDeps
+}
+
+func NewProposalsService(p *platformDeps) *ProposalsService {
+	return &ProposalsService{resolver: p.resolver(), proposalsDepsRef: p}
 }
 
 func (s *ProposalsService) GetProposal(ctx context.Context, req *pb.GetProposalRequest) (*pb.GetProposalResponse, error) {
-	_ = tenancy.TenantOf(ctx)
+	st, _, err := s.resolveStore(ctx, auth.IdentityOf(ctx).Subject, req.GetGenealogyId(),
+		platform.RoleViewer, false)
+	if err != nil {
+		return nil, err
+	}
 	id, err := idFromProto(req.GetId())
 	if err != nil {
 		return nil, err
 	}
-	rtx, err := s.Store.View(ctx)
+	rtx, err := st.View(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -43,8 +53,12 @@ func (s *ProposalsService) GetProposal(ctx context.Context, req *pb.GetProposalR
 }
 
 func (s *ProposalsService) ListProposals(ctx context.Context, req *pb.ListProposalsRequest) (*pb.ListProposalsResponse, error) {
-	_ = tenancy.TenantOf(ctx)
-	rtx, err := s.Store.View(ctx)
+	st, _, err := s.resolveStore(ctx, auth.IdentityOf(ctx).Subject, req.GetGenealogyId(),
+		platform.RoleViewer, false)
+	if err != nil {
+		return nil, err
+	}
+	rtx, err := st.View(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +79,11 @@ func (s *ProposalsService) ListProposals(ctx context.Context, req *pb.ListPropos
 }
 
 func (s *ProposalsService) CreateProposal(ctx context.Context, req *pb.CreateProposalRequest) (*pb.CreateProposalResponse, error) {
-	_ = tenancy.TenantOf(ctx)
+	st, _, err := s.resolveStore(ctx, auth.IdentityOf(ctx).Subject, req.GetGenealogyId(),
+		platform.RoleContributor, true)
+	if err != nil {
+		return nil, err
+	}
 	id := auth.IdentityOf(ctx)
 	target, err := idFromProto(req.GetTargetId())
 	if err != nil {
@@ -98,7 +116,7 @@ func (s *ProposalsService) CreateProposal(ctx context.Context, req *pb.CreatePro
 	if err != nil {
 		return nil, err
 	}
-	v, err := s.Store.Update(ctx, func(tx store.WriteTx) error { return tx.PutProposal(pp) })
+	v, err := st.Update(ctx, func(tx store.WriteTx) error { return tx.PutProposal(pp) })
 	if err != nil {
 		return nil, err
 	}
@@ -109,37 +127,143 @@ func (s *ProposalsService) CreateProposal(ctx context.Context, req *pb.CreatePro
 }
 
 // ----- transitions -----
+//
+// Author submit/withdraw need only Contributor; curator
+// transitions (claim/accept/reject) need Curator.
 
 func (s *ProposalsService) Submit(ctx context.Context, req *pb.TransitionRequest) (*pb.Proposal, error) {
-	return s.transition(ctx, req, governance.Submit)
-}
-func (s *ProposalsService) Claim(ctx context.Context, req *pb.TransitionRequest) (*pb.Proposal, error) {
-	return s.transition(ctx, req, governance.Claim)
-}
-func (s *ProposalsService) Accept(ctx context.Context, req *pb.TransitionRequest) (*pb.Proposal, error) {
-	return s.transition(ctx, req, func(c context.Context, st store.Store, id model.ID, actor string, ts int64) (model.Proposal, error) {
-		return governance.Accept(c, st, id, actor, ts)
-	})
-}
-func (s *ProposalsService) Reject(ctx context.Context, req *pb.TransitionRequest) (*pb.Proposal, error) {
-	return s.transitionWithReason(ctx, req, governance.Reject)
+	return s.transition(ctx, req, platform.RoleContributor, true, governance.Submit)
 }
 func (s *ProposalsService) Withdraw(ctx context.Context, req *pb.TransitionRequest) (*pb.Proposal, error) {
-	return s.transitionWithReason(ctx, req, governance.Withdraw)
+	return s.transitionWithReason(ctx, req, platform.RoleContributor, false, governance.Withdraw)
+}
+func (s *ProposalsService) Claim(ctx context.Context, req *pb.TransitionRequest) (*pb.Proposal, error) {
+	return s.transition(ctx, req, platform.RoleCurator, false, governance.Claim)
+}
+func (s *ProposalsService) Accept(ctx context.Context, req *pb.TransitionRequest) (*pb.Proposal, error) {
+	gid := req.GetGenealogyId()
+	st, _, err := s.resolveStore(ctx, auth.IdentityOf(ctx).Subject, gid,
+		platform.RoleCurator, false)
+	if err != nil {
+		return nil, err
+	}
+	id, err := idFromProto(req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	// Person quota: if this proposal would create a Person, check
+	// before applying so we never exceed the cap.
+	rtx, err := st.View(ctx)
+	if err != nil {
+		return nil, err
+	}
+	pendingProp, err := rtx.GetProposal(id)
+	rtx.Close()
+	if err != nil {
+		return nil, err
+	}
+	createsPerson := pendingProp.Action() == model.ProposalActionCreate &&
+		pendingProp.EntityKind() == model.EntityKindPerson
+	if createsPerson {
+		if err := s.qcheckCreatePerson(gid); err != nil {
+			return nil, err
+		}
+	}
+	actor := auth.IdentityOf(ctx).Subject
+	out, err := governance.Accept(ctx, st, id, actor, time.Now().Unix())
+	if err != nil {
+		return nil, err
+	}
+	if createsPerson {
+		_ = s.qincPerson(gid)
+	}
+	return proposalToProto(out), nil
 }
 
-// transition runs a no-reason lifecycle move (Submit, Claim, Accept).
+// qcheckCreatePerson is a tiny indirection so deps may be nil in
+// older tests; production wiring always sets Quotas.
+func (s *ProposalsService) qcheckCreatePerson(gid string) error {
+	d := s.deps()
+	if d == nil || d.Quotas == nil {
+		return nil
+	}
+	if err := d.Quotas.CheckCreatePerson(gid); err != nil {
+		return lerrors.New(lerrors.CodeInvalidArgument, "person quota exceeded")
+	}
+	return nil
+}
+
+func (s *ProposalsService) qincPerson(gid string) error {
+	d := s.deps()
+	if d == nil || d.Quotas == nil {
+		return nil
+	}
+	return d.Quotas.IncPerson(gid)
+}
+
+// deps recovers the platformDeps the resolver was built from.
+// resolver embeds platform/authz/tenants but not Quotas; we keep
+// a back-reference here. v0.3 will refactor this away.
+func (s *ProposalsService) deps() *platformDeps {
+	return s.proposalsDepsRef
+}
+func (s *ProposalsService) Reject(ctx context.Context, req *pb.TransitionRequest) (*pb.Proposal, error) {
+	return s.transitionWithReason(ctx, req, platform.RoleCurator, false, governance.Reject)
+}
+
+// BulkReject runs Reject for each id, collecting per-id results.
+// All ids must belong to the same genealogy. Curator role is
+// enforced once via the resolver; per-proposal Reject errors
+// (e.g. terminal-state) are reported per id rather than aborting.
+func (s *ProposalsService) BulkReject(ctx context.Context, req *pb.BulkRejectRequest) (*pb.BulkRejectResponse, error) {
+	st, _, err := s.resolveStore(ctx, auth.IdentityOf(ctx).Subject, req.GetGenealogyId(),
+		platform.RoleCurator, false)
+	if err != nil {
+		return nil, err
+	}
+	reason := req.GetReason()
+	if reason == "" {
+		reason = "bulk reject"
+	}
+	actor := auth.IdentityOf(ctx).Subject
+	now := time.Now().Unix()
+	out := &pb.BulkRejectResponse{}
+	for _, idProto := range req.GetIds() {
+		id, err := idFromProto(idProto)
+		if err != nil {
+			out.Results = append(out.Results, &pb.BulkRejectResult{
+				Id: idProto, Ok: false, Error: err.Error(),
+			})
+			continue
+		}
+		_, err = governance.Reject(ctx, st, id, actor, now, reason)
+		if err != nil {
+			out.Results = append(out.Results, &pb.BulkRejectResult{
+				Id: idProto, Ok: false, Error: err.Error(),
+			})
+			continue
+		}
+		out.Results = append(out.Results, &pb.BulkRejectResult{Id: idProto, Ok: true})
+	}
+	return out, nil
+}
+
 func (s *ProposalsService) transition(
 	ctx context.Context, req *pb.TransitionRequest,
+	minRole platform.Role, requiresProposalSubmission bool,
 	fn func(context.Context, store.Store, model.ID, string, int64) (model.Proposal, error),
 ) (*pb.Proposal, error) {
-	_ = tenancy.TenantOf(ctx)
+	st, _, err := s.resolveStore(ctx, auth.IdentityOf(ctx).Subject, req.GetGenealogyId(),
+		minRole, requiresProposalSubmission)
+	if err != nil {
+		return nil, err
+	}
 	actor := auth.IdentityOf(ctx).Subject
 	id, err := idFromProto(req.GetId())
 	if err != nil {
 		return nil, err
 	}
-	out, err := fn(ctx, s.Store, id, actor, time.Now().Unix())
+	out, err := fn(ctx, st, id, actor, time.Now().Unix())
 	if err != nil {
 		return nil, err
 	}
@@ -148,15 +272,20 @@ func (s *ProposalsService) transition(
 
 func (s *ProposalsService) transitionWithReason(
 	ctx context.Context, req *pb.TransitionRequest,
+	minRole platform.Role, requiresProposalSubmission bool,
 	fn func(context.Context, store.Store, model.ID, string, int64, string) (model.Proposal, error),
 ) (*pb.Proposal, error) {
-	_ = tenancy.TenantOf(ctx)
+	st, _, err := s.resolveStore(ctx, auth.IdentityOf(ctx).Subject, req.GetGenealogyId(),
+		minRole, requiresProposalSubmission)
+	if err != nil {
+		return nil, err
+	}
 	actor := auth.IdentityOf(ctx).Subject
 	id, err := idFromProto(req.GetId())
 	if err != nil {
 		return nil, err
 	}
-	out, err := fn(ctx, s.Store, id, actor, time.Now().Unix(), req.GetReason())
+	out, err := fn(ctx, st, id, actor, time.Now().Unix(), req.GetReason())
 	if err != nil {
 		return nil, err
 	}

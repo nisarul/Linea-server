@@ -9,46 +9,58 @@ import "linea/v1/common.proto";
 // be mutated (CCGGS §8). There are no direct PUT* RPCs by design.
 service Proposals {
   rpc GetProposal   (GetProposalRequest)    returns (GetProposalResponse) {
-    option (google.api.http) = { get: "/v1/proposals/{id.value}" };
+    option (google.api.http) = { get: "/v1/g/{genealogy_id}/proposals/{id.value}" };
   }
   rpc ListProposals (ListProposalsRequest)  returns (ListProposalsResponse) {
-    option (google.api.http) = { get: "/v1/proposals" };
+    option (google.api.http) = { get: "/v1/g/{genealogy_id}/proposals" };
   }
 
   // Create a Draft proposal.
   rpc CreateProposal(CreateProposalRequest) returns (CreateProposalResponse) {
     option (google.api.http) = {
-      post: "/v1/proposals"
+      post: "/v1/g/{genealogy_id}/proposals"
       body: "*"
     };
   }
 
   // Lifecycle transitions. See CCGGS §8.3.
   rpc Submit  (TransitionRequest) returns (Proposal) {
-    option (google.api.http) = { post: "/v1/proposals/{id.value}:submit"  body: "*" };
+    option (google.api.http) = { post: "/v1/g/{genealogy_id}/proposals/{id.value}:submit"  body: "*" };
   }
   rpc Claim   (TransitionRequest) returns (Proposal) {
-    option (google.api.http) = { post: "/v1/proposals/{id.value}:claim"   body: "*" };
+    option (google.api.http) = { post: "/v1/g/{genealogy_id}/proposals/{id.value}:claim"   body: "*" };
   }
   rpc Accept  (TransitionRequest) returns (Proposal) {
-    option (google.api.http) = { post: "/v1/proposals/{id.value}:accept"  body: "*" };
+    option (google.api.http) = { post: "/v1/g/{genealogy_id}/proposals/{id.value}:accept"  body: "*" };
   }
   rpc Reject  (TransitionRequest) returns (Proposal) {
-    option (google.api.http) = { post: "/v1/proposals/{id.value}:reject"  body: "*" };
+    option (google.api.http) = { post: "/v1/g/{genealogy_id}/proposals/{id.value}:reject"  body: "*" };
   }
   rpc Withdraw(TransitionRequest) returns (Proposal) {
-    option (google.api.http) = { post: "/v1/proposals/{id.value}:withdraw" body: "*" };
+    option (google.api.http) = { post: "/v1/g/{genealogy_id}/proposals/{id.value}:withdraw" body: "*" };
+  }
+
+  // Bulk-reject a list of proposals with a single reason.
+  // Useful for moderating spam on Public/Unlisted genealogies.
+  // Curator role required (per-proposal Reject's auth still applies).
+  // Per-id outcomes are returned in BulkRejectResponse.results.
+  rpc BulkReject(BulkRejectRequest) returns (BulkRejectResponse) {
+    option (google.api.http) = {
+      post: "/v1/g/{genealogy_id}/proposals:bulkReject"
+      body: "*"
+    };
   }
 }
 
-message GetProposalRequest  { Id id = 1; }
+message GetProposalRequest  { string genealogy_id = 1; Id id = 2; }
 message GetProposalResponse { Proposal proposal = 1; uint64 graph_version = 2; }
 
 message ListProposalsRequest  {
-  int32 page_size = 1;
-  string page_token = 2;
+  string         genealogy_id = 1;
+  int32          page_size    = 2;
+  string         page_token   = 3;
   // Optional state filter.
-  ProposalState state_filter = 3;
+  ProposalState  state_filter = 4;
 }
 message ListProposalsResponse {
   repeated Proposal proposals = 1;
@@ -57,18 +69,37 @@ message ListProposalsResponse {
 }
 
 message CreateProposalRequest {
-  ProposalAction action      = 1;
-  EntityKind     entity_kind = 2;
-  Id             target_id   = 3;
-  Id             secondary_id = 4;
-  bytes          payload     = 5;
-  string         reason      = 6;
-  repeated Id    sources     = 7;
+  string         genealogy_id = 1;
+  ProposalAction action       = 2;
+  EntityKind     entity_kind  = 3;
+  Id             target_id    = 4;
+  Id             secondary_id = 5;
+  bytes          payload      = 6;
+  string         reason       = 7;
+  repeated Id    sources      = 8;
 }
 message CreateProposalResponse { Proposal proposal = 1; uint64 graph_version = 2; }
 
 message TransitionRequest {
-  Id     id     = 1;
+  string genealogy_id = 1;
+  Id     id           = 2;
   // Required for Reject; optional otherwise.
-  string reason = 2;
+  string reason       = 3;
+}
+
+message BulkRejectRequest {
+  string         genealogy_id = 1;
+  repeated Id    ids          = 2;
+  string         reason       = 3;
+}
+
+message BulkRejectResult {
+  Id     id      = 1;
+  bool   ok      = 2;
+  // Stable error code if !ok (e.g. INVALID_PROPOSAL_TRANSITION).
+  string error   = 3;
+}
+
+message BulkRejectResponse {
+  repeated BulkRejectResult results = 1;
 }

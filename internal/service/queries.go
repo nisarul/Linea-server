@@ -7,20 +7,28 @@ import (
 
 	"github.com/nisarul/Linea-core/explain"
 	"github.com/nisarul/Linea-core/query"
-	"github.com/nisarul/Linea-core/store"
 
 	pb "github.com/nisarul/Linea-server/gen/go/linea/v1"
-	"github.com/nisarul/Linea-server/internal/tenancy"
+	"github.com/nisarul/Linea-server/internal/auth"
+	"github.com/nisarul/Linea-server/internal/platform"
 )
 
 // QueriesService implements pb.QueriesServer.
 type QueriesService struct {
 	pb.UnimplementedQueriesServer
-	Store store.Store
+	resolver
+}
+
+func NewQueriesService(p *platformDeps) *QueriesService {
+	return &QueriesService{resolver: p.resolver()}
 }
 
 func (s *QueriesService) FindPaths(ctx context.Context, req *pb.FindPathsRequest) (*pb.FindPathsResponse, error) {
-	_ = tenancy.TenantOf(ctx)
+	st, _, err := s.resolveStore(ctx, auth.IdentityOf(ctx).Subject, req.GetGenealogyId(),
+		platform.RoleViewer, false)
+	if err != nil {
+		return nil, err
+	}
 	from, err := idFromProto(req.GetFrom())
 	if err != nil {
 		return nil, err
@@ -29,7 +37,7 @@ func (s *QueriesService) FindPaths(ctx context.Context, req *pb.FindPathsRequest
 	if err != nil {
 		return nil, err
 	}
-	rtx, err := s.Store.View(ctx)
+	rtx, err := st.View(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +62,11 @@ func (s *QueriesService) FindPaths(ctx context.Context, req *pb.FindPathsRequest
 }
 
 func (s *QueriesService) NKCA(ctx context.Context, req *pb.NKCARequest) (*pb.NKCAResponse, error) {
-	_ = tenancy.TenantOf(ctx)
+	st, _, err := s.resolveStore(ctx, auth.IdentityOf(ctx).Subject, req.GetGenealogyId(),
+		platform.RoleViewer, false)
+	if err != nil {
+		return nil, err
+	}
 	a, err := idFromProto(req.GetA())
 	if err != nil {
 		return nil, err
@@ -63,7 +75,7 @@ func (s *QueriesService) NKCA(ctx context.Context, req *pb.NKCARequest) (*pb.NKC
 	if err != nil {
 		return nil, err
 	}
-	rtx, err := s.Store.View(ctx)
+	rtx, err := st.View(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -77,11 +89,11 @@ func (s *QueriesService) NKCA(ctx context.Context, req *pb.NKCARequest) (*pb.NKC
 		return nil, err
 	}
 	out := &pb.NKCAResponse{
-		AncestorId:         &pb.Id{Value: exp.AncestorID.String()},
-		AncestorIsUnknown:  exp.AncestorIsUnknown,
-		TotalGenerations:   int32(exp.TotalGenerations),
-		CombinedCertainty:  certaintyToProto(exp.CombinedCertainty),
-		GraphVersion:       uint64(exp.GraphVersion),
+		AncestorId:        &pb.Id{Value: exp.AncestorID.String()},
+		AncestorIsUnknown: exp.AncestorIsUnknown,
+		TotalGenerations:  int32(exp.TotalGenerations),
+		CombinedCertainty: certaintyToProto(exp.CombinedCertainty),
+		GraphVersion:      uint64(exp.GraphVersion),
 	}
 	if exp.PathFromA != nil {
 		out.PathFromA = pathExplanationToProto(*exp.PathFromA)

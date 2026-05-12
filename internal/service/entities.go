@@ -6,26 +6,35 @@ import (
 	"context"
 
 	"github.com/nisarul/Linea-core/model"
-	"github.com/nisarul/Linea-core/store"
 
 	pb "github.com/nisarul/Linea-server/gen/go/linea/v1"
-	"github.com/nisarul/Linea-server/internal/tenancy"
+	"github.com/nisarul/Linea-server/internal/auth"
+	"github.com/nisarul/Linea-server/internal/platform"
 )
 
 // PersonsService implements pb.PersonsServer.
 type PersonsService struct {
 	pb.UnimplementedPersonsServer
-	Store store.Store
+	resolver
 }
 
-// GetPerson returns a single Person by ID.
+// NewPersonsService constructs the service with the supplied
+// platform/authz/tenants infrastructure.
+func NewPersonsService(p *platformDeps) *PersonsService {
+	return &PersonsService{resolver: p.resolver()}
+}
+
 func (s *PersonsService) GetPerson(ctx context.Context, req *pb.GetPersonRequest) (*pb.GetPersonResponse, error) {
-	_ = tenancy.TenantOf(ctx) // v0.2 will scope per tenant
+	st, _, err := s.resolveStore(ctx, auth.IdentityOf(ctx).Subject, req.GetGenealogyId(),
+		platform.RoleViewer, false)
+	if err != nil {
+		return nil, err
+	}
 	id, err := idFromProto(req.GetId())
 	if err != nil {
 		return nil, err
 	}
-	rtx, err := s.Store.View(ctx)
+	rtx, err := st.View(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -40,13 +49,13 @@ func (s *PersonsService) GetPerson(ctx context.Context, req *pb.GetPersonRequest
 	}, nil
 }
 
-// ListPersons enumerates all persons. Pagination is currently
-// best-effort: the underlying store provides no cursor, so v0.1
-// returns the full set in a single page. v0.2 will switch to a
-// real cursor when the store grows that capability.
-func (s *PersonsService) ListPersons(ctx context.Context, _ *pb.ListPersonsRequest) (*pb.ListPersonsResponse, error) {
-	_ = tenancy.TenantOf(ctx)
-	rtx, err := s.Store.View(ctx)
+func (s *PersonsService) ListPersons(ctx context.Context, req *pb.ListPersonsRequest) (*pb.ListPersonsResponse, error) {
+	st, _, err := s.resolveStore(ctx, auth.IdentityOf(ctx).Subject, req.GetGenealogyId(),
+		platform.RoleViewer, false)
+	if err != nil {
+		return nil, err
+	}
+	rtx, err := st.View(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -65,16 +74,24 @@ func (s *PersonsService) ListPersons(ctx context.Context, _ *pb.ListPersonsReque
 // RelationshipsService implements pb.RelationshipsServer.
 type RelationshipsService struct {
 	pb.UnimplementedRelationshipsServer
-	Store store.Store
+	resolver
+}
+
+func NewRelationshipsService(p *platformDeps) *RelationshipsService {
+	return &RelationshipsService{resolver: p.resolver()}
 }
 
 func (s *RelationshipsService) GetRelationship(ctx context.Context, req *pb.GetRelationshipRequest) (*pb.GetRelationshipResponse, error) {
-	_ = tenancy.TenantOf(ctx)
+	st, _, err := s.resolveStore(ctx, auth.IdentityOf(ctx).Subject, req.GetGenealogyId(),
+		platform.RoleViewer, false)
+	if err != nil {
+		return nil, err
+	}
 	id, err := idFromProto(req.GetId())
 	if err != nil {
 		return nil, err
 	}
-	rtx, err := s.Store.View(ctx)
+	rtx, err := st.View(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -89,9 +106,13 @@ func (s *RelationshipsService) GetRelationship(ctx context.Context, req *pb.GetR
 	}, nil
 }
 
-func (s *RelationshipsService) ListRelationships(ctx context.Context, _ *pb.ListRelationshipsRequest) (*pb.ListRelationshipsResponse, error) {
-	_ = tenancy.TenantOf(ctx)
-	rtx, err := s.Store.View(ctx)
+func (s *RelationshipsService) ListRelationships(ctx context.Context, req *pb.ListRelationshipsRequest) (*pb.ListRelationshipsResponse, error) {
+	st, _, err := s.resolveStore(ctx, auth.IdentityOf(ctx).Subject, req.GetGenealogyId(),
+		platform.RoleViewer, false)
+	if err != nil {
+		return nil, err
+	}
+	rtx, err := st.View(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -110,16 +131,24 @@ func (s *RelationshipsService) ListRelationships(ctx context.Context, _ *pb.List
 // SourcesService implements pb.SourcesServer.
 type SourcesService struct {
 	pb.UnimplementedSourcesServer
-	Store store.Store
+	resolver
+}
+
+func NewSourcesService(p *platformDeps) *SourcesService {
+	return &SourcesService{resolver: p.resolver()}
 }
 
 func (s *SourcesService) GetSource(ctx context.Context, req *pb.GetSourceRequest) (*pb.GetSourceResponse, error) {
-	_ = tenancy.TenantOf(ctx)
+	st, _, err := s.resolveStore(ctx, auth.IdentityOf(ctx).Subject, req.GetGenealogyId(),
+		platform.RoleViewer, false)
+	if err != nil {
+		return nil, err
+	}
 	id, err := idFromProto(req.GetId())
 	if err != nil {
 		return nil, err
 	}
-	rtx, err := s.Store.View(ctx)
+	rtx, err := st.View(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -134,9 +163,13 @@ func (s *SourcesService) GetSource(ctx context.Context, req *pb.GetSourceRequest
 	}, nil
 }
 
-func (s *SourcesService) ListSources(ctx context.Context, _ *pb.ListSourcesRequest) (*pb.ListSourcesResponse, error) {
-	_ = tenancy.TenantOf(ctx)
-	rtx, err := s.Store.View(ctx)
+func (s *SourcesService) ListSources(ctx context.Context, req *pb.ListSourcesRequest) (*pb.ListSourcesResponse, error) {
+	st, _, err := s.resolveStore(ctx, auth.IdentityOf(ctx).Subject, req.GetGenealogyId(),
+		platform.RoleViewer, false)
+	if err != nil {
+		return nil, err
+	}
+	rtx, err := st.View(ctx)
 	if err != nil {
 		return nil, err
 	}

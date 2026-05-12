@@ -27,6 +27,7 @@ const (
 	Proposals_Accept_FullMethodName         = "/linea.v1.Proposals/Accept"
 	Proposals_Reject_FullMethodName         = "/linea.v1.Proposals/Reject"
 	Proposals_Withdraw_FullMethodName       = "/linea.v1.Proposals/Withdraw"
+	Proposals_BulkReject_FullMethodName     = "/linea.v1.Proposals/BulkReject"
 )
 
 // ProposalsClient is the client API for Proposals service.
@@ -46,6 +47,11 @@ type ProposalsClient interface {
 	Accept(ctx context.Context, in *TransitionRequest, opts ...grpc.CallOption) (*Proposal, error)
 	Reject(ctx context.Context, in *TransitionRequest, opts ...grpc.CallOption) (*Proposal, error)
 	Withdraw(ctx context.Context, in *TransitionRequest, opts ...grpc.CallOption) (*Proposal, error)
+	// Bulk-reject a list of proposals with a single reason.
+	// Useful for moderating spam on Public/Unlisted genealogies.
+	// Curator role required (per-proposal Reject's auth still applies).
+	// Per-id outcomes are returned in BulkRejectResponse.results.
+	BulkReject(ctx context.Context, in *BulkRejectRequest, opts ...grpc.CallOption) (*BulkRejectResponse, error)
 }
 
 type proposalsClient struct {
@@ -136,6 +142,16 @@ func (c *proposalsClient) Withdraw(ctx context.Context, in *TransitionRequest, o
 	return out, nil
 }
 
+func (c *proposalsClient) BulkReject(ctx context.Context, in *BulkRejectRequest, opts ...grpc.CallOption) (*BulkRejectResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BulkRejectResponse)
+	err := c.cc.Invoke(ctx, Proposals_BulkReject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProposalsServer is the server API for Proposals service.
 // All implementations must embed UnimplementedProposalsServer
 // for forward compatibility.
@@ -153,6 +169,11 @@ type ProposalsServer interface {
 	Accept(context.Context, *TransitionRequest) (*Proposal, error)
 	Reject(context.Context, *TransitionRequest) (*Proposal, error)
 	Withdraw(context.Context, *TransitionRequest) (*Proposal, error)
+	// Bulk-reject a list of proposals with a single reason.
+	// Useful for moderating spam on Public/Unlisted genealogies.
+	// Curator role required (per-proposal Reject's auth still applies).
+	// Per-id outcomes are returned in BulkRejectResponse.results.
+	BulkReject(context.Context, *BulkRejectRequest) (*BulkRejectResponse, error)
 	mustEmbedUnimplementedProposalsServer()
 }
 
@@ -186,6 +207,9 @@ func (UnimplementedProposalsServer) Reject(context.Context, *TransitionRequest) 
 }
 func (UnimplementedProposalsServer) Withdraw(context.Context, *TransitionRequest) (*Proposal, error) {
 	return nil, status.Error(codes.Unimplemented, "method Withdraw not implemented")
+}
+func (UnimplementedProposalsServer) BulkReject(context.Context, *BulkRejectRequest) (*BulkRejectResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method BulkReject not implemented")
 }
 func (UnimplementedProposalsServer) mustEmbedUnimplementedProposalsServer() {}
 func (UnimplementedProposalsServer) testEmbeddedByValue()                   {}
@@ -352,6 +376,24 @@ func _Proposals_Withdraw_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Proposals_BulkReject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BulkRejectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProposalsServer).BulkReject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Proposals_BulkReject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProposalsServer).BulkReject(ctx, req.(*BulkRejectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Proposals_ServiceDesc is the grpc.ServiceDesc for Proposals service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -390,6 +432,10 @@ var Proposals_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Withdraw",
 			Handler:    _Proposals_Withdraw_Handler,
+		},
+		{
+			MethodName: "BulkReject",
+			Handler:    _Proposals_BulkReject_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

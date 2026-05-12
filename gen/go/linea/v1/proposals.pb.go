@@ -24,7 +24,8 @@ const (
 
 type GetProposalRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *Id                    `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	GenealogyId   string                 `protobuf:"bytes,1,opt,name=genealogy_id,json=genealogyId,proto3" json:"genealogy_id,omitempty"`
+	Id            *Id                    `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -57,6 +58,13 @@ func (x *GetProposalRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetProposalRequest.ProtoReflect.Descriptor instead.
 func (*GetProposalRequest) Descriptor() ([]byte, []int) {
 	return file_linea_v1_proposals_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *GetProposalRequest) GetGenealogyId() string {
+	if x != nil {
+		return x.GenealogyId
+	}
+	return ""
 }
 
 func (x *GetProposalRequest) GetId() *Id {
@@ -119,11 +127,12 @@ func (x *GetProposalResponse) GetGraphVersion() uint64 {
 }
 
 type ListProposalsRequest struct {
-	state     protoimpl.MessageState `protogen:"open.v1"`
-	PageSize  int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	GenealogyId string                 `protobuf:"bytes,1,opt,name=genealogy_id,json=genealogyId,proto3" json:"genealogy_id,omitempty"`
+	PageSize    int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken   string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	// Optional state filter.
-	StateFilter   ProposalState `protobuf:"varint,3,opt,name=state_filter,json=stateFilter,proto3,enum=linea.v1.ProposalState" json:"state_filter,omitempty"`
+	StateFilter   ProposalState `protobuf:"varint,4,opt,name=state_filter,json=stateFilter,proto3,enum=linea.v1.ProposalState" json:"state_filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -156,6 +165,13 @@ func (x *ListProposalsRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListProposalsRequest.ProtoReflect.Descriptor instead.
 func (*ListProposalsRequest) Descriptor() ([]byte, []int) {
 	return file_linea_v1_proposals_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ListProposalsRequest) GetGenealogyId() string {
+	if x != nil {
+		return x.GenealogyId
+	}
+	return ""
 }
 
 func (x *ListProposalsRequest) GetPageSize() int32 {
@@ -241,13 +257,14 @@ func (x *ListProposalsResponse) GetGraphVersion() uint64 {
 
 type CreateProposalRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Action        ProposalAction         `protobuf:"varint,1,opt,name=action,proto3,enum=linea.v1.ProposalAction" json:"action,omitempty"`
-	EntityKind    EntityKind             `protobuf:"varint,2,opt,name=entity_kind,json=entityKind,proto3,enum=linea.v1.EntityKind" json:"entity_kind,omitempty"`
-	TargetId      *Id                    `protobuf:"bytes,3,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
-	SecondaryId   *Id                    `protobuf:"bytes,4,opt,name=secondary_id,json=secondaryId,proto3" json:"secondary_id,omitempty"`
-	Payload       []byte                 `protobuf:"bytes,5,opt,name=payload,proto3" json:"payload,omitempty"`
-	Reason        string                 `protobuf:"bytes,6,opt,name=reason,proto3" json:"reason,omitempty"`
-	Sources       []*Id                  `protobuf:"bytes,7,rep,name=sources,proto3" json:"sources,omitempty"`
+	GenealogyId   string                 `protobuf:"bytes,1,opt,name=genealogy_id,json=genealogyId,proto3" json:"genealogy_id,omitempty"`
+	Action        ProposalAction         `protobuf:"varint,2,opt,name=action,proto3,enum=linea.v1.ProposalAction" json:"action,omitempty"`
+	EntityKind    EntityKind             `protobuf:"varint,3,opt,name=entity_kind,json=entityKind,proto3,enum=linea.v1.EntityKind" json:"entity_kind,omitempty"`
+	TargetId      *Id                    `protobuf:"bytes,4,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
+	SecondaryId   *Id                    `protobuf:"bytes,5,opt,name=secondary_id,json=secondaryId,proto3" json:"secondary_id,omitempty"`
+	Payload       []byte                 `protobuf:"bytes,6,opt,name=payload,proto3" json:"payload,omitempty"`
+	Reason        string                 `protobuf:"bytes,7,opt,name=reason,proto3" json:"reason,omitempty"`
+	Sources       []*Id                  `protobuf:"bytes,8,rep,name=sources,proto3" json:"sources,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -280,6 +297,13 @@ func (x *CreateProposalRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CreateProposalRequest.ProtoReflect.Descriptor instead.
 func (*CreateProposalRequest) Descriptor() ([]byte, []int) {
 	return file_linea_v1_proposals_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CreateProposalRequest) GetGenealogyId() string {
+	if x != nil {
+		return x.GenealogyId
+	}
+	return ""
 }
 
 func (x *CreateProposalRequest) GetAction() ProposalAction {
@@ -384,10 +408,11 @@ func (x *CreateProposalResponse) GetGraphVersion() uint64 {
 }
 
 type TransitionRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	Id    *Id                    `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	GenealogyId string                 `protobuf:"bytes,1,opt,name=genealogy_id,json=genealogyId,proto3" json:"genealogy_id,omitempty"`
+	Id          *Id                    `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
 	// Required for Reject; optional otherwise.
-	Reason        string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	Reason        string `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -422,6 +447,13 @@ func (*TransitionRequest) Descriptor() ([]byte, []int) {
 	return file_linea_v1_proposals_proto_rawDescGZIP(), []int{6}
 }
 
+func (x *TransitionRequest) GetGenealogyId() string {
+	if x != nil {
+		return x.GenealogyId
+	}
+	return ""
+}
+
 func (x *TransitionRequest) GetId() *Id {
 	if x != nil {
 		return x.Id
@@ -436,49 +468,230 @@ func (x *TransitionRequest) GetReason() string {
 	return ""
 }
 
+type BulkRejectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GenealogyId   string                 `protobuf:"bytes,1,opt,name=genealogy_id,json=genealogyId,proto3" json:"genealogy_id,omitempty"`
+	Ids           []*Id                  `protobuf:"bytes,2,rep,name=ids,proto3" json:"ids,omitempty"`
+	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BulkRejectRequest) Reset() {
+	*x = BulkRejectRequest{}
+	mi := &file_linea_v1_proposals_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BulkRejectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BulkRejectRequest) ProtoMessage() {}
+
+func (x *BulkRejectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_linea_v1_proposals_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BulkRejectRequest.ProtoReflect.Descriptor instead.
+func (*BulkRejectRequest) Descriptor() ([]byte, []int) {
+	return file_linea_v1_proposals_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *BulkRejectRequest) GetGenealogyId() string {
+	if x != nil {
+		return x.GenealogyId
+	}
+	return ""
+}
+
+func (x *BulkRejectRequest) GetIds() []*Id {
+	if x != nil {
+		return x.Ids
+	}
+	return nil
+}
+
+func (x *BulkRejectRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+type BulkRejectResult struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Id    *Id                    `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Ok    bool                   `protobuf:"varint,2,opt,name=ok,proto3" json:"ok,omitempty"`
+	// Stable error code if !ok (e.g. INVALID_PROPOSAL_TRANSITION).
+	Error         string `protobuf:"bytes,3,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BulkRejectResult) Reset() {
+	*x = BulkRejectResult{}
+	mi := &file_linea_v1_proposals_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BulkRejectResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BulkRejectResult) ProtoMessage() {}
+
+func (x *BulkRejectResult) ProtoReflect() protoreflect.Message {
+	mi := &file_linea_v1_proposals_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BulkRejectResult.ProtoReflect.Descriptor instead.
+func (*BulkRejectResult) Descriptor() ([]byte, []int) {
+	return file_linea_v1_proposals_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *BulkRejectResult) GetId() *Id {
+	if x != nil {
+		return x.Id
+	}
+	return nil
+}
+
+func (x *BulkRejectResult) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
+func (x *BulkRejectResult) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+type BulkRejectResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Results       []*BulkRejectResult    `protobuf:"bytes,1,rep,name=results,proto3" json:"results,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BulkRejectResponse) Reset() {
+	*x = BulkRejectResponse{}
+	mi := &file_linea_v1_proposals_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BulkRejectResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BulkRejectResponse) ProtoMessage() {}
+
+func (x *BulkRejectResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_linea_v1_proposals_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BulkRejectResponse.ProtoReflect.Descriptor instead.
+func (*BulkRejectResponse) Descriptor() ([]byte, []int) {
+	return file_linea_v1_proposals_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *BulkRejectResponse) GetResults() []*BulkRejectResult {
+	if x != nil {
+		return x.Results
+	}
+	return nil
+}
+
 var File_linea_v1_proposals_proto protoreflect.FileDescriptor
 
 const file_linea_v1_proposals_proto_rawDesc = "" +
 	"\n" +
-	"\x18linea/v1/proposals.proto\x12\blinea.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x15linea/v1/common.proto\"2\n" +
-	"\x12GetProposalRequest\x12\x1c\n" +
-	"\x02id\x18\x01 \x01(\v2\f.linea.v1.IdR\x02id\"j\n" +
+	"\x18linea/v1/proposals.proto\x12\blinea.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x15linea/v1/common.proto\"U\n" +
+	"\x12GetProposalRequest\x12!\n" +
+	"\fgenealogy_id\x18\x01 \x01(\tR\vgenealogyId\x12\x1c\n" +
+	"\x02id\x18\x02 \x01(\v2\f.linea.v1.IdR\x02id\"j\n" +
 	"\x13GetProposalResponse\x12.\n" +
 	"\bproposal\x18\x01 \x01(\v2\x12.linea.v1.ProposalR\bproposal\x12#\n" +
-	"\rgraph_version\x18\x02 \x01(\x04R\fgraphVersion\"\x8e\x01\n" +
-	"\x14ListProposalsRequest\x12\x1b\n" +
-	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\rgraph_version\x18\x02 \x01(\x04R\fgraphVersion\"\xb1\x01\n" +
+	"\x14ListProposalsRequest\x12!\n" +
+	"\fgenealogy_id\x18\x01 \x01(\tR\vgenealogyId\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
-	"page_token\x18\x02 \x01(\tR\tpageToken\x12:\n" +
-	"\fstate_filter\x18\x03 \x01(\x0e2\x17.linea.v1.ProposalStateR\vstateFilter\"\x96\x01\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\x12:\n" +
+	"\fstate_filter\x18\x04 \x01(\x0e2\x17.linea.v1.ProposalStateR\vstateFilter\"\x96\x01\n" +
 	"\x15ListProposalsResponse\x120\n" +
 	"\tproposals\x18\x01 \x03(\v2\x12.linea.v1.ProposalR\tproposals\x12&\n" +
 	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12#\n" +
-	"\rgraph_version\x18\x03 \x01(\x04R\fgraphVersion\"\xb6\x02\n" +
-	"\x15CreateProposalRequest\x120\n" +
-	"\x06action\x18\x01 \x01(\x0e2\x18.linea.v1.ProposalActionR\x06action\x125\n" +
-	"\ventity_kind\x18\x02 \x01(\x0e2\x14.linea.v1.EntityKindR\n" +
+	"\rgraph_version\x18\x03 \x01(\x04R\fgraphVersion\"\xd9\x02\n" +
+	"\x15CreateProposalRequest\x12!\n" +
+	"\fgenealogy_id\x18\x01 \x01(\tR\vgenealogyId\x120\n" +
+	"\x06action\x18\x02 \x01(\x0e2\x18.linea.v1.ProposalActionR\x06action\x125\n" +
+	"\ventity_kind\x18\x03 \x01(\x0e2\x14.linea.v1.EntityKindR\n" +
 	"entityKind\x12)\n" +
-	"\ttarget_id\x18\x03 \x01(\v2\f.linea.v1.IdR\btargetId\x12/\n" +
-	"\fsecondary_id\x18\x04 \x01(\v2\f.linea.v1.IdR\vsecondaryId\x12\x18\n" +
-	"\apayload\x18\x05 \x01(\fR\apayload\x12\x16\n" +
-	"\x06reason\x18\x06 \x01(\tR\x06reason\x12&\n" +
-	"\asources\x18\a \x03(\v2\f.linea.v1.IdR\asources\"m\n" +
+	"\ttarget_id\x18\x04 \x01(\v2\f.linea.v1.IdR\btargetId\x12/\n" +
+	"\fsecondary_id\x18\x05 \x01(\v2\f.linea.v1.IdR\vsecondaryId\x12\x18\n" +
+	"\apayload\x18\x06 \x01(\fR\apayload\x12\x16\n" +
+	"\x06reason\x18\a \x01(\tR\x06reason\x12&\n" +
+	"\asources\x18\b \x03(\v2\f.linea.v1.IdR\asources\"m\n" +
 	"\x16CreateProposalResponse\x12.\n" +
 	"\bproposal\x18\x01 \x01(\v2\x12.linea.v1.ProposalR\bproposal\x12#\n" +
-	"\rgraph_version\x18\x02 \x01(\x04R\fgraphVersion\"I\n" +
-	"\x11TransitionRequest\x12\x1c\n" +
-	"\x02id\x18\x01 \x01(\v2\f.linea.v1.IdR\x02id\x12\x16\n" +
-	"\x06reason\x18\x02 \x01(\tR\x06reason2\xd6\x06\n" +
-	"\tProposals\x12l\n" +
-	"\vGetProposal\x12\x1c.linea.v1.GetProposalRequest\x1a\x1d.linea.v1.GetProposalResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/v1/proposals/{id.value}\x12g\n" +
-	"\rListProposals\x12\x1e.linea.v1.ListProposalsRequest\x1a\x1f.linea.v1.ListProposalsResponse\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/v1/proposals\x12m\n" +
-	"\x0eCreateProposal\x12\x1f.linea.v1.CreateProposalRequest\x1a .linea.v1.CreateProposalResponse\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/v1/proposals\x12e\n" +
-	"\x06Submit\x12\x1b.linea.v1.TransitionRequest\x1a\x12.linea.v1.Proposal\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/v1/proposals/{id.value}:submit\x12c\n" +
-	"\x05Claim\x12\x1b.linea.v1.TransitionRequest\x1a\x12.linea.v1.Proposal\")\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/v1/proposals/{id.value}:claim\x12e\n" +
-	"\x06Accept\x12\x1b.linea.v1.TransitionRequest\x1a\x12.linea.v1.Proposal\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/v1/proposals/{id.value}:accept\x12e\n" +
-	"\x06Reject\x12\x1b.linea.v1.TransitionRequest\x1a\x12.linea.v1.Proposal\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/v1/proposals/{id.value}:reject\x12i\n" +
-	"\bWithdraw\x12\x1b.linea.v1.TransitionRequest\x1a\x12.linea.v1.Proposal\",\x82\xd3\xe4\x93\x02&:\x01*\"!/v1/proposals/{id.value}:withdrawB\x98\x01\n" +
+	"\rgraph_version\x18\x02 \x01(\x04R\fgraphVersion\"l\n" +
+	"\x11TransitionRequest\x12!\n" +
+	"\fgenealogy_id\x18\x01 \x01(\tR\vgenealogyId\x12\x1c\n" +
+	"\x02id\x18\x02 \x01(\v2\f.linea.v1.IdR\x02id\x12\x16\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\"n\n" +
+	"\x11BulkRejectRequest\x12!\n" +
+	"\fgenealogy_id\x18\x01 \x01(\tR\vgenealogyId\x12\x1e\n" +
+	"\x03ids\x18\x02 \x03(\v2\f.linea.v1.IdR\x03ids\x12\x16\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\"V\n" +
+	"\x10BulkRejectResult\x12\x1c\n" +
+	"\x02id\x18\x01 \x01(\v2\f.linea.v1.IdR\x02id\x12\x0e\n" +
+	"\x02ok\x18\x02 \x01(\bR\x02ok\x12\x14\n" +
+	"\x05error\x18\x03 \x01(\tR\x05error\"J\n" +
+	"\x12BulkRejectResponse\x124\n" +
+	"\aresults\x18\x01 \x03(\v2\x1a.linea.v1.BulkRejectResultR\aresults2\xdd\b\n" +
+	"\tProposals\x12}\n" +
+	"\vGetProposal\x12\x1c.linea.v1.GetProposalRequest\x1a\x1d.linea.v1.GetProposalResponse\"1\x82\xd3\xe4\x93\x02+\x12)/v1/g/{genealogy_id}/proposals/{id.value}\x12x\n" +
+	"\rListProposals\x12\x1e.linea.v1.ListProposalsRequest\x1a\x1f.linea.v1.ListProposalsResponse\"&\x82\xd3\xe4\x93\x02 \x12\x1e/v1/g/{genealogy_id}/proposals\x12~\n" +
+	"\x0eCreateProposal\x12\x1f.linea.v1.CreateProposalRequest\x1a .linea.v1.CreateProposalResponse\")\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/v1/g/{genealogy_id}/proposals\x12v\n" +
+	"\x06Submit\x12\x1b.linea.v1.TransitionRequest\x1a\x12.linea.v1.Proposal\";\x82\xd3\xe4\x93\x025:\x01*\"0/v1/g/{genealogy_id}/proposals/{id.value}:submit\x12t\n" +
+	"\x05Claim\x12\x1b.linea.v1.TransitionRequest\x1a\x12.linea.v1.Proposal\":\x82\xd3\xe4\x93\x024:\x01*\"//v1/g/{genealogy_id}/proposals/{id.value}:claim\x12v\n" +
+	"\x06Accept\x12\x1b.linea.v1.TransitionRequest\x1a\x12.linea.v1.Proposal\";\x82\xd3\xe4\x93\x025:\x01*\"0/v1/g/{genealogy_id}/proposals/{id.value}:accept\x12v\n" +
+	"\x06Reject\x12\x1b.linea.v1.TransitionRequest\x1a\x12.linea.v1.Proposal\";\x82\xd3\xe4\x93\x025:\x01*\"0/v1/g/{genealogy_id}/proposals/{id.value}:reject\x12z\n" +
+	"\bWithdraw\x12\x1b.linea.v1.TransitionRequest\x1a\x12.linea.v1.Proposal\"=\x82\xd3\xe4\x93\x027:\x01*\"2/v1/g/{genealogy_id}/proposals/{id.value}:withdraw\x12}\n" +
+	"\n" +
+	"BulkReject\x12\x1b.linea.v1.BulkRejectRequest\x1a\x1c.linea.v1.BulkRejectResponse\"4\x82\xd3\xe4\x93\x02.:\x01*\")/v1/g/{genealogy_id}/proposals:bulkRejectB\x98\x01\n" +
 	"\fcom.linea.v1B\x0eProposalsProtoP\x01Z7github.com/nisarul/Linea-server/gen/go/linea/v1;lineav1\xa2\x02\x03LXX\xaa\x02\bLinea.V1\xca\x02\bLinea\\V1\xe2\x02\x14Linea\\V1\\GPBMetadata\xea\x02\tLinea::V1b\x06proto3"
 
 var (
@@ -493,7 +706,7 @@ func file_linea_v1_proposals_proto_rawDescGZIP() []byte {
 	return file_linea_v1_proposals_proto_rawDescData
 }
 
-var file_linea_v1_proposals_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_linea_v1_proposals_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_linea_v1_proposals_proto_goTypes = []any{
 	(*GetProposalRequest)(nil),     // 0: linea.v1.GetProposalRequest
 	(*GetProposalResponse)(nil),    // 1: linea.v1.GetProposalResponse
@@ -502,45 +715,53 @@ var file_linea_v1_proposals_proto_goTypes = []any{
 	(*CreateProposalRequest)(nil),  // 4: linea.v1.CreateProposalRequest
 	(*CreateProposalResponse)(nil), // 5: linea.v1.CreateProposalResponse
 	(*TransitionRequest)(nil),      // 6: linea.v1.TransitionRequest
-	(*Id)(nil),                     // 7: linea.v1.Id
-	(*Proposal)(nil),               // 8: linea.v1.Proposal
-	(ProposalState)(0),             // 9: linea.v1.ProposalState
-	(ProposalAction)(0),            // 10: linea.v1.ProposalAction
-	(EntityKind)(0),                // 11: linea.v1.EntityKind
+	(*BulkRejectRequest)(nil),      // 7: linea.v1.BulkRejectRequest
+	(*BulkRejectResult)(nil),       // 8: linea.v1.BulkRejectResult
+	(*BulkRejectResponse)(nil),     // 9: linea.v1.BulkRejectResponse
+	(*Id)(nil),                     // 10: linea.v1.Id
+	(*Proposal)(nil),               // 11: linea.v1.Proposal
+	(ProposalState)(0),             // 12: linea.v1.ProposalState
+	(ProposalAction)(0),            // 13: linea.v1.ProposalAction
+	(EntityKind)(0),                // 14: linea.v1.EntityKind
 }
 var file_linea_v1_proposals_proto_depIdxs = []int32{
-	7,  // 0: linea.v1.GetProposalRequest.id:type_name -> linea.v1.Id
-	8,  // 1: linea.v1.GetProposalResponse.proposal:type_name -> linea.v1.Proposal
-	9,  // 2: linea.v1.ListProposalsRequest.state_filter:type_name -> linea.v1.ProposalState
-	8,  // 3: linea.v1.ListProposalsResponse.proposals:type_name -> linea.v1.Proposal
-	10, // 4: linea.v1.CreateProposalRequest.action:type_name -> linea.v1.ProposalAction
-	11, // 5: linea.v1.CreateProposalRequest.entity_kind:type_name -> linea.v1.EntityKind
-	7,  // 6: linea.v1.CreateProposalRequest.target_id:type_name -> linea.v1.Id
-	7,  // 7: linea.v1.CreateProposalRequest.secondary_id:type_name -> linea.v1.Id
-	7,  // 8: linea.v1.CreateProposalRequest.sources:type_name -> linea.v1.Id
-	8,  // 9: linea.v1.CreateProposalResponse.proposal:type_name -> linea.v1.Proposal
-	7,  // 10: linea.v1.TransitionRequest.id:type_name -> linea.v1.Id
-	0,  // 11: linea.v1.Proposals.GetProposal:input_type -> linea.v1.GetProposalRequest
-	2,  // 12: linea.v1.Proposals.ListProposals:input_type -> linea.v1.ListProposalsRequest
-	4,  // 13: linea.v1.Proposals.CreateProposal:input_type -> linea.v1.CreateProposalRequest
-	6,  // 14: linea.v1.Proposals.Submit:input_type -> linea.v1.TransitionRequest
-	6,  // 15: linea.v1.Proposals.Claim:input_type -> linea.v1.TransitionRequest
-	6,  // 16: linea.v1.Proposals.Accept:input_type -> linea.v1.TransitionRequest
-	6,  // 17: linea.v1.Proposals.Reject:input_type -> linea.v1.TransitionRequest
-	6,  // 18: linea.v1.Proposals.Withdraw:input_type -> linea.v1.TransitionRequest
-	1,  // 19: linea.v1.Proposals.GetProposal:output_type -> linea.v1.GetProposalResponse
-	3,  // 20: linea.v1.Proposals.ListProposals:output_type -> linea.v1.ListProposalsResponse
-	5,  // 21: linea.v1.Proposals.CreateProposal:output_type -> linea.v1.CreateProposalResponse
-	8,  // 22: linea.v1.Proposals.Submit:output_type -> linea.v1.Proposal
-	8,  // 23: linea.v1.Proposals.Claim:output_type -> linea.v1.Proposal
-	8,  // 24: linea.v1.Proposals.Accept:output_type -> linea.v1.Proposal
-	8,  // 25: linea.v1.Proposals.Reject:output_type -> linea.v1.Proposal
-	8,  // 26: linea.v1.Proposals.Withdraw:output_type -> linea.v1.Proposal
-	19, // [19:27] is the sub-list for method output_type
-	11, // [11:19] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	10, // 0: linea.v1.GetProposalRequest.id:type_name -> linea.v1.Id
+	11, // 1: linea.v1.GetProposalResponse.proposal:type_name -> linea.v1.Proposal
+	12, // 2: linea.v1.ListProposalsRequest.state_filter:type_name -> linea.v1.ProposalState
+	11, // 3: linea.v1.ListProposalsResponse.proposals:type_name -> linea.v1.Proposal
+	13, // 4: linea.v1.CreateProposalRequest.action:type_name -> linea.v1.ProposalAction
+	14, // 5: linea.v1.CreateProposalRequest.entity_kind:type_name -> linea.v1.EntityKind
+	10, // 6: linea.v1.CreateProposalRequest.target_id:type_name -> linea.v1.Id
+	10, // 7: linea.v1.CreateProposalRequest.secondary_id:type_name -> linea.v1.Id
+	10, // 8: linea.v1.CreateProposalRequest.sources:type_name -> linea.v1.Id
+	11, // 9: linea.v1.CreateProposalResponse.proposal:type_name -> linea.v1.Proposal
+	10, // 10: linea.v1.TransitionRequest.id:type_name -> linea.v1.Id
+	10, // 11: linea.v1.BulkRejectRequest.ids:type_name -> linea.v1.Id
+	10, // 12: linea.v1.BulkRejectResult.id:type_name -> linea.v1.Id
+	8,  // 13: linea.v1.BulkRejectResponse.results:type_name -> linea.v1.BulkRejectResult
+	0,  // 14: linea.v1.Proposals.GetProposal:input_type -> linea.v1.GetProposalRequest
+	2,  // 15: linea.v1.Proposals.ListProposals:input_type -> linea.v1.ListProposalsRequest
+	4,  // 16: linea.v1.Proposals.CreateProposal:input_type -> linea.v1.CreateProposalRequest
+	6,  // 17: linea.v1.Proposals.Submit:input_type -> linea.v1.TransitionRequest
+	6,  // 18: linea.v1.Proposals.Claim:input_type -> linea.v1.TransitionRequest
+	6,  // 19: linea.v1.Proposals.Accept:input_type -> linea.v1.TransitionRequest
+	6,  // 20: linea.v1.Proposals.Reject:input_type -> linea.v1.TransitionRequest
+	6,  // 21: linea.v1.Proposals.Withdraw:input_type -> linea.v1.TransitionRequest
+	7,  // 22: linea.v1.Proposals.BulkReject:input_type -> linea.v1.BulkRejectRequest
+	1,  // 23: linea.v1.Proposals.GetProposal:output_type -> linea.v1.GetProposalResponse
+	3,  // 24: linea.v1.Proposals.ListProposals:output_type -> linea.v1.ListProposalsResponse
+	5,  // 25: linea.v1.Proposals.CreateProposal:output_type -> linea.v1.CreateProposalResponse
+	11, // 26: linea.v1.Proposals.Submit:output_type -> linea.v1.Proposal
+	11, // 27: linea.v1.Proposals.Claim:output_type -> linea.v1.Proposal
+	11, // 28: linea.v1.Proposals.Accept:output_type -> linea.v1.Proposal
+	11, // 29: linea.v1.Proposals.Reject:output_type -> linea.v1.Proposal
+	11, // 30: linea.v1.Proposals.Withdraw:output_type -> linea.v1.Proposal
+	9,  // 31: linea.v1.Proposals.BulkReject:output_type -> linea.v1.BulkRejectResponse
+	23, // [23:32] is the sub-list for method output_type
+	14, // [14:23] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_linea_v1_proposals_proto_init() }
@@ -555,7 +776,7 @@ func file_linea_v1_proposals_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_linea_v1_proposals_proto_rawDesc), len(file_linea_v1_proposals_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

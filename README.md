@@ -9,27 +9,32 @@ genealogical graph framework, built on [`Linea-core`](https://github.com/nisarul
 
 Pre-release. Implements spec v1.1.0.
 
-**v0.1 ships single-tenant** with a tenant-aware skeleton already in place;
-**v0.2 brings real multi-tenancy with one Badger database per tenant.**
-The public API will not break between v0.1 and v0.2 — only the `Tenants`
-admin service is added.
+**v0.2 ships multi-tenancy**: each Genealogy is isolated in its
+own embedded Badger database under `<data-dir>/genealogies/<id>/`,
+with a global platform DB at `<data-dir>/platform/`.
 
-## Features (v0.1)
+## Features (v0.2)
 
 - gRPC service definitions in [`proto/linea/v1/`](./proto/linea/v1)
 - Auto-generated REST gateway via `grpc-gateway` (one source of truth)
 - OIDC bearer-token authentication (Keycloak in dev, any OIDC issuer in prod)
-- RBAC roles per CCGGS §8.1: Viewer, Contributor, Curator
+- Per-Genealogy roles: `Owner`, `Curator`, `Contributor`, `Viewer` (CCGGS §8.1 + Owner split)
+- Visibility tiers: `Private` (default), `Unlisted`, `Public`
+- Implicit roles based on visibility (anonymous Viewer on Public; logged-in Contributor on Public/Unlisted)
 - All graph mutation goes through the proposal lifecycle (no direct PUT RPCs on the wire)
-- OpenTelemetry traces, Prometheus `/metrics`, structured JSON logs
+- Free-tier quotas: 5 private genealogies/user, 1000 persons/genealogy (configurable)
+- Anti-abuse: in-process per-key rate-limit interceptor, ban-from-genealogy, BulkReject RPC
+- OpenTelemetry-ready (slog structured JSON for now), Prometheus `/metrics` (planned)
 - `/healthz` liveness + `/readyz` readiness probes
 
-## What v0.1 does NOT do
+## What v0.2 does NOT do
 
-- True multi-tenancy (planned for v0.2 — see [docs/roadmap.md](./docs/roadmap.md))
 - TLS termination (deploy behind an ingress / sidecar)
-- Rate limiting (planned for v0.2)
 - Streaming change subscriptions (planned for v0.3)
+- Cross-replica rate limits — current limiter is in-process. v0.3 swaps in Redis.
+- Name-based search across Public genealogies (planned for v0.3)
+- Per-genealogy custom domains / billing
+- Forking a genealogy's data inside one server (forking the *source* is already free via AGPL)
 
 ## Quick start (dev)
 

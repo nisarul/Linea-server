@@ -9,25 +9,26 @@ service Queries {
   // Find ranked genealogical paths between two persons (CCGGS §9.3).
   rpc FindPaths(FindPathsRequest) returns (FindPathsResponse) {
     option (google.api.http) = {
-      post: "/v1/queries:findPaths"
+      post: "/v1/g/{genealogy_id}/queries:findPaths"
       body: "*"
     };
   }
   // Nearest known common ancestor (CCGGS §9.6).
   rpc NKCA(NKCARequest) returns (NKCAResponse) {
     option (google.api.http) = {
-      post: "/v1/queries:nkca"
+      post: "/v1/g/{genealogy_id}/queries:nkca"
       body: "*"
     };
   }
 }
 
 message FindPathsRequest {
-  Id    from            = 1;
-  Id    to              = 2;
-  int32 max_depth       = 3;
-  int32 max_paths       = 4;
-  bool  include_affinal = 5;
+  string genealogy_id    = 1;
+  Id     from            = 2;
+  Id     to              = 3;
+  int32  max_depth       = 4;
+  int32  max_paths       = 5;
+  bool   include_affinal = 6;
 }
 
 message Step {
@@ -60,7 +61,7 @@ message FindPathsResponse {
   uint64        graph_version = 2;
 }
 
-message NKCARequest { Id a = 1; Id b = 2; }
+message NKCARequest { string genealogy_id = 1; Id a = 2; Id b = 3; }
 
 message NKCAResponse {
   Id        ancestor_id          = 1;

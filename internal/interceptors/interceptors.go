@@ -15,12 +15,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
 
 	lerrors "github.com/nisarul/Linea-core/errors"
 
 	"github.com/nisarul/Linea-server/internal/auth"
-	"github.com/nisarul/Linea-server/internal/tenancy"
 )
 
 // AuthInterceptor extracts the bearer token from incoming
@@ -33,7 +33,7 @@ func AuthInterceptor(verifier *auth.Verifier, noAuth map[string]bool) grpc.Unary
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler) (any, error) {
 		if noAuth[info.FullMethod] {
-			return handler(tenancy.WithTenant(ctx, tenancy.DefaultTenant), req)
+			return handler(ctx, req)
 		}
 		// Auth disabled mode: verifier == nil. Use an anonymous
 		// curator so dev/test setups can skip OIDC entirely. This
@@ -41,7 +41,6 @@ func AuthInterceptor(verifier *auth.Verifier, noAuth map[string]bool) grpc.Unary
 		if verifier == nil {
 			id := auth.Identity{Subject: "anonymous", Role: auth.RoleCurator}
 			ctx = auth.WithIdentity(ctx, id)
-			ctx = tenancy.WithTenant(ctx, tenancy.DefaultTenant)
 			return handler(ctx, req)
 		}
 		md, _ := metadata.FromIncomingContext(ctx)
@@ -57,7 +56,6 @@ func AuthInterceptor(verifier *auth.Verifier, noAuth map[string]bool) grpc.Unary
 			return nil, status.Error(codes.PermissionDenied, "no Linea role granted")
 		}
 		ctx = auth.WithIdentity(ctx, id)
-		ctx = tenancy.WithTenant(ctx, tenancy.DefaultTenant)
 		return handler(ctx, req)
 	}
 }
@@ -104,7 +102,6 @@ func LoggingInterceptor(logger *slog.Logger) grpc.UnaryServerInterceptor {
 			slog.String("method", info.FullMethod),
 			slog.String("subject", id.Subject),
 			slog.String("role", id.Role.String()),
-			slog.String("tenant", string(tenancy.TenantOf(ctx))),
 			slog.Duration("dur", time.Since(start)),
 		}
 		if err != nil {
@@ -116,6 +113,47 @@ func LoggingInterceptor(logger *slog.Logger) grpc.UnaryServerInterceptor {
 		}
 		return resp, err
 	}
+}
+
+// RateLimitInterceptor rejects calls when the per-key rate
+// budget is exhausted. The keyFn picks the bucket key; typical
+// choices are "<subject>" for authenticated requests or the
+// peer address for anonymous ones.
+//
+// Returns codes.ResourceExhausted on rejection so clients can
+// distinguish from auth failures.
+func RateLimitInterceptor(limiter rateLimiter, keyFn func(context.Context) string) grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo,
+		handler grpc.UnaryHandler) (any, error) {
+		key := keyFn(ctx)
+		if key == "" {
+			return handler(ctx, req)
+		}
+		if !limiter.Allow(key) {
+			return nil, status.Error(codes.ResourceExhausted, "rate limit exceeded")
+		}
+		return handler(ctx, req)
+	}
+}
+
+// rateLimiter is the minimal interface RateLimitInterceptor uses.
+// It matches *ratelimit.Bucket and ratelimit.AlwaysAllow without
+// pulling that package into the import cycle.
+type rateLimiter interface {
+	Allow(key string) bool
+}
+
+// SubjectOrPeerKey returns the JWT subject if authenticated,
+// else the peer address (best-effort). Used as the default
+// keyFn for RateLimitInterceptor.
+func SubjectOrPeerKey(ctx context.Context) string {
+	if id := auth.IdentityOf(ctx); id.Subject != "" {
+		return "u:" + id.Subject
+	}
+	if p, ok := peer.FromContext(ctx); ok && p.Addr != nil {
+		return "ip:" + p.Addr.String()
+	}
+	return ""
 }
 
 // ErrorInterceptor maps Linea-core typed errors to gRPC status codes.

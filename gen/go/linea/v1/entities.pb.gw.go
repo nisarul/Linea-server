@@ -35,7 +35,7 @@ var (
 	_ = metadata.Join
 )
 
-var filter_Persons_GetPerson_0 = &utilities.DoubleArray{Encoding: map[string]int{"id": 0, "value": 1}, Base: []int{1, 1, 1, 0}, Check: []int{0, 1, 2, 3}}
+var filter_Persons_GetPerson_0 = &utilities.DoubleArray{Encoding: map[string]int{"genealogy_id": 0, "id": 1, "value": 2}, Base: []int{1, 1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 3, 2, 4}}
 
 func request_Persons_GetPerson_0(ctx context.Context, marshaler runtime.Marshaler, client PersonsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
@@ -46,7 +46,15 @@ func request_Persons_GetPerson_0(ctx context.Context, marshaler runtime.Marshale
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
 	}
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -70,7 +78,15 @@ func local_request_Persons_GetPerson_0(ctx context.Context, marshaler runtime.Ma
 		metadata runtime.ServerMetadata
 		err      error
 	)
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -88,15 +104,24 @@ func local_request_Persons_GetPerson_0(ctx context.Context, marshaler runtime.Ma
 	return msg, metadata, err
 }
 
-var filter_Persons_ListPersons_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+var filter_Persons_ListPersons_0 = &utilities.DoubleArray{Encoding: map[string]int{"genealogy_id": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
 
 func request_Persons_ListPersons_0(ctx context.Context, marshaler runtime.Marshaler, client PersonsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq ListPersonsRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
 	}
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
@@ -112,7 +137,16 @@ func local_request_Persons_ListPersons_0(ctx context.Context, marshaler runtime.
 	var (
 		protoReq ListPersonsRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
@@ -123,7 +157,7 @@ func local_request_Persons_ListPersons_0(ctx context.Context, marshaler runtime.
 	return msg, metadata, err
 }
 
-var filter_Relationships_GetRelationship_0 = &utilities.DoubleArray{Encoding: map[string]int{"id": 0, "value": 1}, Base: []int{1, 1, 1, 0}, Check: []int{0, 1, 2, 3}}
+var filter_Relationships_GetRelationship_0 = &utilities.DoubleArray{Encoding: map[string]int{"genealogy_id": 0, "id": 1, "value": 2}, Base: []int{1, 1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 3, 2, 4}}
 
 func request_Relationships_GetRelationship_0(ctx context.Context, marshaler runtime.Marshaler, client RelationshipsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
@@ -134,7 +168,15 @@ func request_Relationships_GetRelationship_0(ctx context.Context, marshaler runt
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
 	}
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -158,7 +200,15 @@ func local_request_Relationships_GetRelationship_0(ctx context.Context, marshale
 		metadata runtime.ServerMetadata
 		err      error
 	)
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -176,15 +226,24 @@ func local_request_Relationships_GetRelationship_0(ctx context.Context, marshale
 	return msg, metadata, err
 }
 
-var filter_Relationships_ListRelationships_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+var filter_Relationships_ListRelationships_0 = &utilities.DoubleArray{Encoding: map[string]int{"genealogy_id": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
 
 func request_Relationships_ListRelationships_0(ctx context.Context, marshaler runtime.Marshaler, client RelationshipsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq ListRelationshipsRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
 	}
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
@@ -200,7 +259,16 @@ func local_request_Relationships_ListRelationships_0(ctx context.Context, marsha
 	var (
 		protoReq ListRelationshipsRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
@@ -211,7 +279,7 @@ func local_request_Relationships_ListRelationships_0(ctx context.Context, marsha
 	return msg, metadata, err
 }
 
-var filter_Sources_GetSource_0 = &utilities.DoubleArray{Encoding: map[string]int{"id": 0, "value": 1}, Base: []int{1, 1, 1, 0}, Check: []int{0, 1, 2, 3}}
+var filter_Sources_GetSource_0 = &utilities.DoubleArray{Encoding: map[string]int{"genealogy_id": 0, "id": 1, "value": 2}, Base: []int{1, 1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 3, 2, 4}}
 
 func request_Sources_GetSource_0(ctx context.Context, marshaler runtime.Marshaler, client SourcesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
@@ -222,7 +290,15 @@ func request_Sources_GetSource_0(ctx context.Context, marshaler runtime.Marshale
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
 	}
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -246,7 +322,15 @@ func local_request_Sources_GetSource_0(ctx context.Context, marshaler runtime.Ma
 		metadata runtime.ServerMetadata
 		err      error
 	)
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -264,15 +348,24 @@ func local_request_Sources_GetSource_0(ctx context.Context, marshaler runtime.Ma
 	return msg, metadata, err
 }
 
-var filter_Sources_ListSources_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+var filter_Sources_ListSources_0 = &utilities.DoubleArray{Encoding: map[string]int{"genealogy_id": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
 
 func request_Sources_ListSources_0(ctx context.Context, marshaler runtime.Marshaler, client SourcesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq ListSourcesRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
 	}
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
@@ -288,7 +381,16 @@ func local_request_Sources_ListSources_0(ctx context.Context, marshaler runtime.
 	var (
 		protoReq ListSourcesRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
@@ -311,7 +413,7 @@ func RegisterPersonsHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Persons/GetPerson", runtime.WithHTTPPathPattern("/v1/persons/{id.value}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Persons/GetPerson", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/persons/{id.value}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -331,7 +433,7 @@ func RegisterPersonsHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Persons/ListPersons", runtime.WithHTTPPathPattern("/v1/persons"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Persons/ListPersons", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/persons"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -361,7 +463,7 @@ func RegisterRelationshipsHandlerServer(ctx context.Context, mux *runtime.ServeM
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Relationships/GetRelationship", runtime.WithHTTPPathPattern("/v1/relationships/{id.value}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Relationships/GetRelationship", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/relationships/{id.value}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -381,7 +483,7 @@ func RegisterRelationshipsHandlerServer(ctx context.Context, mux *runtime.ServeM
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Relationships/ListRelationships", runtime.WithHTTPPathPattern("/v1/relationships"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Relationships/ListRelationships", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/relationships"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -411,7 +513,7 @@ func RegisterSourcesHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Sources/GetSource", runtime.WithHTTPPathPattern("/v1/sources/{id.value}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Sources/GetSource", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/sources/{id.value}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -431,7 +533,7 @@ func RegisterSourcesHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Sources/ListSources", runtime.WithHTTPPathPattern("/v1/sources"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Sources/ListSources", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/sources"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -489,7 +591,7 @@ func RegisterPersonsHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Persons/GetPerson", runtime.WithHTTPPathPattern("/v1/persons/{id.value}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Persons/GetPerson", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/persons/{id.value}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -506,7 +608,7 @@ func RegisterPersonsHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Persons/ListPersons", runtime.WithHTTPPathPattern("/v1/persons"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Persons/ListPersons", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/persons"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -523,8 +625,8 @@ func RegisterPersonsHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 }
 
 var (
-	pattern_Persons_GetPerson_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "persons", "id.value"}, ""))
-	pattern_Persons_ListPersons_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "persons"}, ""))
+	pattern_Persons_GetPerson_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "g", "genealogy_id", "persons", "id.value"}, ""))
+	pattern_Persons_ListPersons_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "g", "genealogy_id", "persons"}, ""))
 )
 
 var (
@@ -572,7 +674,7 @@ func RegisterRelationshipsHandlerClient(ctx context.Context, mux *runtime.ServeM
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Relationships/GetRelationship", runtime.WithHTTPPathPattern("/v1/relationships/{id.value}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Relationships/GetRelationship", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/relationships/{id.value}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -589,7 +691,7 @@ func RegisterRelationshipsHandlerClient(ctx context.Context, mux *runtime.ServeM
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Relationships/ListRelationships", runtime.WithHTTPPathPattern("/v1/relationships"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Relationships/ListRelationships", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/relationships"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -606,8 +708,8 @@ func RegisterRelationshipsHandlerClient(ctx context.Context, mux *runtime.ServeM
 }
 
 var (
-	pattern_Relationships_GetRelationship_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "relationships", "id.value"}, ""))
-	pattern_Relationships_ListRelationships_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "relationships"}, ""))
+	pattern_Relationships_GetRelationship_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "g", "genealogy_id", "relationships", "id.value"}, ""))
+	pattern_Relationships_ListRelationships_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "g", "genealogy_id", "relationships"}, ""))
 )
 
 var (
@@ -655,7 +757,7 @@ func RegisterSourcesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Sources/GetSource", runtime.WithHTTPPathPattern("/v1/sources/{id.value}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Sources/GetSource", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/sources/{id.value}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -672,7 +774,7 @@ func RegisterSourcesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Sources/ListSources", runtime.WithHTTPPathPattern("/v1/sources"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Sources/ListSources", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/sources"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -689,8 +791,8 @@ func RegisterSourcesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 }
 
 var (
-	pattern_Sources_GetSource_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "sources", "id.value"}, ""))
-	pattern_Sources_ListSources_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "sources"}, ""))
+	pattern_Sources_GetSource_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "g", "genealogy_id", "sources", "id.value"}, ""))
+	pattern_Sources_ListSources_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "g", "genealogy_id", "sources"}, ""))
 )
 
 var (

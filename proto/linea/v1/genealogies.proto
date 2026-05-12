@@ -1,0 +1,199 @@
+syntax = "proto3";
+
+package linea.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// Visibility of a Genealogy per the v0.2 spec.
+enum Visibility {
+  VISIBILITY_UNSPECIFIED = 0;
+  VISIBILITY_PRIVATE     = 1; // explicit members only (default)
+  VISIBILITY_UNLISTED    = 2; // anyone with the URL can read
+  VISIBILITY_PUBLIC      = 3; // anyone (incl. unauthenticated) can read
+}
+
+// Role within a single Genealogy. Higher numeric value = more
+// privileged. ROLE_NONE is "no membership" (used in responses).
+enum GenealogyRole {
+  GENEALOGY_ROLE_UNSPECIFIED = 0;
+  GENEALOGY_ROLE_NONE        = 1;
+  GENEALOGY_ROLE_VIEWER      = 2;
+  GENEALOGY_ROLE_CONTRIBUTOR = 3;
+  GENEALOGY_ROLE_CURATOR     = 4;
+  GENEALOGY_ROLE_OWNER       = 5;
+}
+
+// Genealogy as exposed on the wire.
+message Genealogy {
+  string                    id          = 1;
+  string                    name        = 2;
+  Visibility                visibility  = 3;
+  string                    created_by  = 4;
+  google.protobuf.Timestamp created_at  = 5;
+  // Caller's effective role on this genealogy. May be implicit
+  // (e.g. CONTRIBUTOR for any logged-in user on a Public one).
+  GenealogyRole             my_role     = 6;
+}
+
+// Membership record (explicit only; implicit roles are not returned here).
+message Membership {
+  string                    subject     = 1;
+  string                    genealogy_id = 2;
+  GenealogyRole             role        = 3;
+  string                    granted_by  = 4;
+  google.protobuf.Timestamp granted_at  = 5;
+}
+
+// Ban record.
+message Ban {
+  string                    subject     = 1;
+  string                    genealogy_id = 2;
+  string                    reason      = 3;
+  string                    by          = 4;
+  google.protobuf.Timestamp at          = 5;
+}
+
+// Genealogies is the admin/CRUD service for genealogies. Most
+// operations are URL-rooted at /v1/genealogies, NOT under
+// /v1/g/{gid}, since they manipulate genealogies as objects
+// rather than acting from inside one.
+service Genealogies {
+  // Create a brand-new Genealogy. Defaults to PRIVATE.
+  rpc CreateGenealogy(CreateGenealogyRequest) returns (CreateGenealogyResponse) {
+    option (google.api.http) = {
+      post: "/v1/genealogies"
+      body: "*"
+    };
+  }
+
+  // List genealogies visible to the caller.
+  // Includes: ones the caller owns or is a member of, plus all
+  // PUBLIC ones. UNLISTED genealogies are intentionally NOT
+  // listed (they are URL-discoverable only).
+  rpc ListGenealogies(ListGenealogiesRequest) returns (ListGenealogiesResponse) {
+    option (google.api.http) = { get: "/v1/genealogies" };
+  }
+
+  // Fetch a single genealogy by id. Returns NotFound if the
+  // caller has no effective role on it (the existence of a
+  // Private/Unlisted genealogy is itself privileged information).
+  rpc GetGenealogy(GetGenealogyRequest) returns (GetGenealogyResponse) {
+    option (google.api.http) = { get: "/v1/genealogies/{id}" };
+  }
+
+  // Owner-only: change visibility.
+  rpc UpdateVisibility(UpdateVisibilityRequest) returns (Genealogy) {
+    option (google.api.http) = {
+      patch: "/v1/genealogies/{id}/visibility"
+      body: "*"
+    };
+  }
+
+  // Owner-only: hard-delete the genealogy and its data.
+  rpc DeleteGenealogy(DeleteGenealogyRequest) returns (DeleteGenealogyResponse) {
+    option (google.api.http) = { delete: "/v1/genealogies/{id}" };
+  }
+
+  // Owner/Curator only (Owner required for Owner role grants).
+  // Adds a member or updates an existing member's role.
+  rpc UpsertMembership(UpsertMembershipRequest) returns (Membership) {
+    option (google.api.http) = {
+      put: "/v1/genealogies/{genealogy_id}/members/{subject}"
+      body: "*"
+    };
+  }
+
+  // Owner/Curator only.
+  rpc RemoveMember(RemoveMemberRequest) returns (RemoveMemberResponse) {
+    option (google.api.http) = { delete: "/v1/genealogies/{genealogy_id}/members/{subject}" };
+  }
+
+  // Any non-Owner member: leave the genealogy.
+  // For Owners: blocked unless another Owner remains.
+  rpc LeaveGenealogy(LeaveGenealogyRequest) returns (LeaveGenealogyResponse) {
+    option (google.api.http) = {
+      post: "/v1/genealogies/{id}/leave"
+      body: "*"
+    };
+  }
+
+  // Owner/Curator: ban a user from submitting proposals on this
+  // genealogy. Bans do NOT block reads on Public/Unlisted; they
+  // only prevent proposal submission.
+  rpc BanUser(BanUserRequest) returns (Ban) {
+    option (google.api.http) = {
+      put: "/v1/genealogies/{genealogy_id}/bans/{subject}"
+      body: "*"
+    };
+  }
+
+  // Owner/Curator: lift a ban.
+  rpc UnbanUser(UnbanUserRequest) returns (UnbanUserResponse) {
+    option (google.api.http) = { delete: "/v1/genealogies/{genealogy_id}/bans/{subject}" };
+  }
+
+  // List members of a genealogy (Owner/Curator/Contributor/Viewer).
+  rpc ListMembers(ListMembersRequest) returns (ListMembersResponse) {
+    option (google.api.http) = { get: "/v1/genealogies/{genealogy_id}/members" };
+  }
+}
+
+// ----- request/response messages -----
+
+message CreateGenealogyRequest {
+  string     name       = 1;
+  // Optional: defaults to VISIBILITY_PRIVATE if unspecified.
+  Visibility visibility = 2;
+}
+message CreateGenealogyResponse { Genealogy genealogy = 1; }
+
+message ListGenealogiesRequest {
+  int32  page_size  = 1;
+  string page_token = 2;
+}
+message ListGenealogiesResponse {
+  repeated Genealogy genealogies   = 1;
+  string             next_page_token = 2;
+}
+
+message GetGenealogyRequest  { string id = 1; }
+message GetGenealogyResponse { Genealogy genealogy = 1; }
+
+message UpdateVisibilityRequest {
+  string     id         = 1;
+  Visibility visibility = 2;
+}
+
+message DeleteGenealogyRequest  { string id = 1; }
+message DeleteGenealogyResponse {}
+
+message UpsertMembershipRequest {
+  string        genealogy_id = 1;
+  string        subject      = 2;
+  GenealogyRole role         = 3;
+}
+
+message RemoveMemberRequest  { string genealogy_id = 1; string subject = 2; }
+message RemoveMemberResponse {}
+
+message LeaveGenealogyRequest  { string id = 1; }
+message LeaveGenealogyResponse {}
+
+message BanUserRequest {
+  string genealogy_id = 1;
+  string subject      = 2;
+  string reason       = 3;
+}
+message UnbanUserRequest  { string genealogy_id = 1; string subject = 2; }
+message UnbanUserResponse {}
+
+message ListMembersRequest {
+  string genealogy_id = 1;
+  int32  page_size    = 2;
+  string page_token   = 3;
+}
+message ListMembersResponse {
+  repeated Membership memberships    = 1;
+  string              next_page_token = 2;
+}

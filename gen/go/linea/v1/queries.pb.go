@@ -24,11 +24,12 @@ const (
 
 type FindPathsRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	From           *Id                    `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty"`
-	To             *Id                    `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty"`
-	MaxDepth       int32                  `protobuf:"varint,3,opt,name=max_depth,json=maxDepth,proto3" json:"max_depth,omitempty"`
-	MaxPaths       int32                  `protobuf:"varint,4,opt,name=max_paths,json=maxPaths,proto3" json:"max_paths,omitempty"`
-	IncludeAffinal bool                   `protobuf:"varint,5,opt,name=include_affinal,json=includeAffinal,proto3" json:"include_affinal,omitempty"`
+	GenealogyId    string                 `protobuf:"bytes,1,opt,name=genealogy_id,json=genealogyId,proto3" json:"genealogy_id,omitempty"`
+	From           *Id                    `protobuf:"bytes,2,opt,name=from,proto3" json:"from,omitempty"`
+	To             *Id                    `protobuf:"bytes,3,opt,name=to,proto3" json:"to,omitempty"`
+	MaxDepth       int32                  `protobuf:"varint,4,opt,name=max_depth,json=maxDepth,proto3" json:"max_depth,omitempty"`
+	MaxPaths       int32                  `protobuf:"varint,5,opt,name=max_paths,json=maxPaths,proto3" json:"max_paths,omitempty"`
+	IncludeAffinal bool                   `protobuf:"varint,6,opt,name=include_affinal,json=includeAffinal,proto3" json:"include_affinal,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -61,6 +62,13 @@ func (x *FindPathsRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use FindPathsRequest.ProtoReflect.Descriptor instead.
 func (*FindPathsRequest) Descriptor() ([]byte, []int) {
 	return file_linea_v1_queries_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *FindPathsRequest) GetGenealogyId() string {
+	if x != nil {
+		return x.GenealogyId
+	}
+	return ""
 }
 
 func (x *FindPathsRequest) GetFrom() *Id {
@@ -362,8 +370,9 @@ func (x *FindPathsResponse) GetGraphVersion() uint64 {
 
 type NKCARequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	A             *Id                    `protobuf:"bytes,1,opt,name=a,proto3" json:"a,omitempty"`
-	B             *Id                    `protobuf:"bytes,2,opt,name=b,proto3" json:"b,omitempty"`
+	GenealogyId   string                 `protobuf:"bytes,1,opt,name=genealogy_id,json=genealogyId,proto3" json:"genealogy_id,omitempty"`
+	A             *Id                    `protobuf:"bytes,2,opt,name=a,proto3" json:"a,omitempty"`
+	B             *Id                    `protobuf:"bytes,3,opt,name=b,proto3" json:"b,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -396,6 +405,13 @@ func (x *NKCARequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use NKCARequest.ProtoReflect.Descriptor instead.
 func (*NKCARequest) Descriptor() ([]byte, []int) {
 	return file_linea_v1_queries_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *NKCARequest) GetGenealogyId() string {
+	if x != nil {
+		return x.GenealogyId
+	}
+	return ""
 }
 
 func (x *NKCARequest) GetA() *Id {
@@ -508,13 +524,14 @@ var File_linea_v1_queries_proto protoreflect.FileDescriptor
 
 const file_linea_v1_queries_proto_rawDesc = "" +
 	"\n" +
-	"\x16linea/v1/queries.proto\x12\blinea.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x15linea/v1/common.proto\"\xb5\x01\n" +
-	"\x10FindPathsRequest\x12 \n" +
-	"\x04from\x18\x01 \x01(\v2\f.linea.v1.IdR\x04from\x12\x1c\n" +
-	"\x02to\x18\x02 \x01(\v2\f.linea.v1.IdR\x02to\x12\x1b\n" +
-	"\tmax_depth\x18\x03 \x01(\x05R\bmaxDepth\x12\x1b\n" +
-	"\tmax_paths\x18\x04 \x01(\x05R\bmaxPaths\x12'\n" +
-	"\x0finclude_affinal\x18\x05 \x01(\bR\x0eincludeAffinal\"\x80\x03\n" +
+	"\x16linea/v1/queries.proto\x12\blinea.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x15linea/v1/common.proto\"\xd8\x01\n" +
+	"\x10FindPathsRequest\x12!\n" +
+	"\fgenealogy_id\x18\x01 \x01(\tR\vgenealogyId\x12 \n" +
+	"\x04from\x18\x02 \x01(\v2\f.linea.v1.IdR\x04from\x12\x1c\n" +
+	"\x02to\x18\x03 \x01(\v2\f.linea.v1.IdR\x02to\x12\x1b\n" +
+	"\tmax_depth\x18\x04 \x01(\x05R\bmaxDepth\x12\x1b\n" +
+	"\tmax_paths\x18\x05 \x01(\x05R\bmaxPaths\x12'\n" +
+	"\x0finclude_affinal\x18\x06 \x01(\bR\x0eincludeAffinal\"\x80\x03\n" +
 	"\x04Step\x12-\n" +
 	"\vfrom_person\x18\x01 \x01(\v2\f.linea.v1.IdR\n" +
 	"fromPerson\x12)\n" +
@@ -539,10 +556,11 @@ const file_linea_v1_queries_proto_rawDesc = "" +
 	"\rgraph_version\x18\t \x01(\x04R\fgraphVersion\"^\n" +
 	"\x11FindPathsResponse\x12$\n" +
 	"\x05paths\x18\x01 \x03(\v2\x0e.linea.v1.PathR\x05paths\x12#\n" +
-	"\rgraph_version\x18\x02 \x01(\x04R\fgraphVersion\"E\n" +
-	"\vNKCARequest\x12\x1a\n" +
-	"\x01a\x18\x01 \x01(\v2\f.linea.v1.IdR\x01a\x12\x1a\n" +
-	"\x01b\x18\x02 \x01(\v2\f.linea.v1.IdR\x01b\"\xe3\x02\n" +
+	"\rgraph_version\x18\x02 \x01(\x04R\fgraphVersion\"h\n" +
+	"\vNKCARequest\x12!\n" +
+	"\fgenealogy_id\x18\x01 \x01(\tR\vgenealogyId\x12\x1a\n" +
+	"\x01a\x18\x02 \x01(\v2\f.linea.v1.IdR\x01a\x12\x1a\n" +
+	"\x01b\x18\x03 \x01(\v2\f.linea.v1.IdR\x01b\"\xe3\x02\n" +
 	"\fNKCAResponse\x12-\n" +
 	"\vancestor_id\x18\x01 \x01(\v2\f.linea.v1.IdR\n" +
 	"ancestorId\x12.\n" +
@@ -551,10 +569,10 @@ const file_linea_v1_queries_proto_rawDesc = "" +
 	"\x12combined_certainty\x18\x04 \x01(\x0e2\x13.linea.v1.CertaintyR\x11combinedCertainty\x12.\n" +
 	"\vpath_from_a\x18\x05 \x01(\v2\x0e.linea.v1.PathR\tpathFromA\x12.\n" +
 	"\vpath_from_b\x18\x06 \x01(\v2\x0e.linea.v1.PathR\tpathFromB\x12#\n" +
-	"\rgraph_version\x18\a \x01(\x04R\fgraphVersion2\xc5\x01\n" +
-	"\aQueries\x12f\n" +
-	"\tFindPaths\x12\x1a.linea.v1.FindPathsRequest\x1a\x1b.linea.v1.FindPathsResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/v1/queries:findPaths\x12R\n" +
-	"\x04NKCA\x12\x15.linea.v1.NKCARequest\x1a\x16.linea.v1.NKCAResponse\"\x1b\x82\xd3\xe4\x93\x02\x15:\x01*\"\x10/v1/queries:nkcaB\x96\x01\n" +
+	"\rgraph_version\x18\a \x01(\x04R\fgraphVersion2\xe7\x01\n" +
+	"\aQueries\x12w\n" +
+	"\tFindPaths\x12\x1a.linea.v1.FindPathsRequest\x1a\x1b.linea.v1.FindPathsResponse\"1\x82\xd3\xe4\x93\x02+:\x01*\"&/v1/g/{genealogy_id}/queries:findPaths\x12c\n" +
+	"\x04NKCA\x12\x15.linea.v1.NKCARequest\x1a\x16.linea.v1.NKCAResponse\",\x82\xd3\xe4\x93\x02&:\x01*\"!/v1/g/{genealogy_id}/queries:nkcaB\x96\x01\n" +
 	"\fcom.linea.v1B\fQueriesProtoP\x01Z7github.com/nisarul/Linea-server/gen/go/linea/v1;lineav1\xa2\x02\x03LXX\xaa\x02\bLinea.V1\xca\x02\bLinea\\V1\xe2\x02\x14Linea\\V1\\GPBMetadata\xea\x02\tLinea::V1b\x06proto3"
 
 var (

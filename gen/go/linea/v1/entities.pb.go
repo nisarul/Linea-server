@@ -24,7 +24,8 @@ const (
 
 type GetPersonRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *Id                    `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	GenealogyId   string                 `protobuf:"bytes,1,opt,name=genealogy_id,json=genealogyId,proto3" json:"genealogy_id,omitempty"`
+	Id            *Id                    `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -57,6 +58,13 @@ func (x *GetPersonRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetPersonRequest.ProtoReflect.Descriptor instead.
 func (*GetPersonRequest) Descriptor() ([]byte, []int) {
 	return file_linea_v1_entities_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *GetPersonRequest) GetGenealogyId() string {
+	if x != nil {
+		return x.GenealogyId
+	}
+	return ""
 }
 
 func (x *GetPersonRequest) GetId() *Id {
@@ -120,8 +128,9 @@ func (x *GetPersonResponse) GetGraphVersion() uint64 {
 
 type ListPersonsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	GenealogyId   string                 `protobuf:"bytes,1,opt,name=genealogy_id,json=genealogyId,proto3" json:"genealogy_id,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -154,6 +163,13 @@ func (x *ListPersonsRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListPersonsRequest.ProtoReflect.Descriptor instead.
 func (*ListPersonsRequest) Descriptor() ([]byte, []int) {
 	return file_linea_v1_entities_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ListPersonsRequest) GetGenealogyId() string {
+	if x != nil {
+		return x.GenealogyId
+	}
+	return ""
 }
 
 func (x *ListPersonsRequest) GetPageSize() int32 {
@@ -232,7 +248,8 @@ func (x *ListPersonsResponse) GetGraphVersion() uint64 {
 
 type GetRelationshipRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *Id                    `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	GenealogyId   string                 `protobuf:"bytes,1,opt,name=genealogy_id,json=genealogyId,proto3" json:"genealogy_id,omitempty"`
+	Id            *Id                    `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -265,6 +282,13 @@ func (x *GetRelationshipRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetRelationshipRequest.ProtoReflect.Descriptor instead.
 func (*GetRelationshipRequest) Descriptor() ([]byte, []int) {
 	return file_linea_v1_entities_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetRelationshipRequest) GetGenealogyId() string {
+	if x != nil {
+		return x.GenealogyId
+	}
+	return ""
 }
 
 func (x *GetRelationshipRequest) GetId() *Id {
@@ -328,8 +352,9 @@ func (x *GetRelationshipResponse) GetGraphVersion() uint64 {
 
 type ListRelationshipsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	GenealogyId   string                 `protobuf:"bytes,1,opt,name=genealogy_id,json=genealogyId,proto3" json:"genealogy_id,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -362,6 +387,13 @@ func (x *ListRelationshipsRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListRelationshipsRequest.ProtoReflect.Descriptor instead.
 func (*ListRelationshipsRequest) Descriptor() ([]byte, []int) {
 	return file_linea_v1_entities_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ListRelationshipsRequest) GetGenealogyId() string {
+	if x != nil {
+		return x.GenealogyId
+	}
+	return ""
 }
 
 func (x *ListRelationshipsRequest) GetPageSize() int32 {
@@ -440,7 +472,8 @@ func (x *ListRelationshipsResponse) GetGraphVersion() uint64 {
 
 type GetSourceRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *Id                    `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	GenealogyId   string                 `protobuf:"bytes,1,opt,name=genealogy_id,json=genealogyId,proto3" json:"genealogy_id,omitempty"`
+	Id            *Id                    `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -473,6 +506,13 @@ func (x *GetSourceRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetSourceRequest.ProtoReflect.Descriptor instead.
 func (*GetSourceRequest) Descriptor() ([]byte, []int) {
 	return file_linea_v1_entities_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetSourceRequest) GetGenealogyId() string {
+	if x != nil {
+		return x.GenealogyId
+	}
+	return ""
 }
 
 func (x *GetSourceRequest) GetId() *Id {
@@ -536,8 +576,9 @@ func (x *GetSourceResponse) GetGraphVersion() uint64 {
 
 type ListSourcesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	GenealogyId   string                 `protobuf:"bytes,1,opt,name=genealogy_id,json=genealogyId,proto3" json:"genealogy_id,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -570,6 +611,13 @@ func (x *ListSourcesRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListSourcesRequest.ProtoReflect.Descriptor instead.
 func (*ListSourcesRequest) Descriptor() ([]byte, []int) {
 	return file_linea_v1_entities_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ListSourcesRequest) GetGenealogyId() string {
+	if x != nil {
+		return x.GenealogyId
+	}
+	return ""
 }
 
 func (x *ListSourcesRequest) GetPageSize() int32 {
@@ -650,55 +698,61 @@ var File_linea_v1_entities_proto protoreflect.FileDescriptor
 
 const file_linea_v1_entities_proto_rawDesc = "" +
 	"\n" +
-	"\x17linea/v1/entities.proto\x12\blinea.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x15linea/v1/common.proto\"0\n" +
-	"\x10GetPersonRequest\x12\x1c\n" +
-	"\x02id\x18\x01 \x01(\v2\f.linea.v1.IdR\x02id\"b\n" +
+	"\x17linea/v1/entities.proto\x12\blinea.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x15linea/v1/common.proto\"S\n" +
+	"\x10GetPersonRequest\x12!\n" +
+	"\fgenealogy_id\x18\x01 \x01(\tR\vgenealogyId\x12\x1c\n" +
+	"\x02id\x18\x02 \x01(\v2\f.linea.v1.IdR\x02id\"b\n" +
 	"\x11GetPersonResponse\x12(\n" +
 	"\x06person\x18\x01 \x01(\v2\x10.linea.v1.PersonR\x06person\x12#\n" +
-	"\rgraph_version\x18\x02 \x01(\x04R\fgraphVersion\"P\n" +
-	"\x12ListPersonsRequest\x12\x1b\n" +
-	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\rgraph_version\x18\x02 \x01(\x04R\fgraphVersion\"s\n" +
+	"\x12ListPersonsRequest\x12!\n" +
+	"\fgenealogy_id\x18\x01 \x01(\tR\vgenealogyId\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
-	"page_token\x18\x02 \x01(\tR\tpageToken\"\x8e\x01\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\"\x8e\x01\n" +
 	"\x13ListPersonsResponse\x12*\n" +
 	"\apersons\x18\x01 \x03(\v2\x10.linea.v1.PersonR\apersons\x12&\n" +
 	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12#\n" +
-	"\rgraph_version\x18\x03 \x01(\x04R\fgraphVersion\"6\n" +
-	"\x16GetRelationshipRequest\x12\x1c\n" +
-	"\x02id\x18\x01 \x01(\v2\f.linea.v1.IdR\x02id\"z\n" +
+	"\rgraph_version\x18\x03 \x01(\x04R\fgraphVersion\"Y\n" +
+	"\x16GetRelationshipRequest\x12!\n" +
+	"\fgenealogy_id\x18\x01 \x01(\tR\vgenealogyId\x12\x1c\n" +
+	"\x02id\x18\x02 \x01(\v2\f.linea.v1.IdR\x02id\"z\n" +
 	"\x17GetRelationshipResponse\x12:\n" +
 	"\frelationship\x18\x01 \x01(\v2\x16.linea.v1.RelationshipR\frelationship\x12#\n" +
-	"\rgraph_version\x18\x02 \x01(\x04R\fgraphVersion\"V\n" +
-	"\x18ListRelationshipsRequest\x12\x1b\n" +
-	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\rgraph_version\x18\x02 \x01(\x04R\fgraphVersion\"y\n" +
+	"\x18ListRelationshipsRequest\x12!\n" +
+	"\fgenealogy_id\x18\x01 \x01(\tR\vgenealogyId\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
-	"page_token\x18\x02 \x01(\tR\tpageToken\"\xa6\x01\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\"\xa6\x01\n" +
 	"\x19ListRelationshipsResponse\x12<\n" +
 	"\rrelationships\x18\x01 \x03(\v2\x16.linea.v1.RelationshipR\rrelationships\x12&\n" +
 	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12#\n" +
-	"\rgraph_version\x18\x03 \x01(\x04R\fgraphVersion\"0\n" +
-	"\x10GetSourceRequest\x12\x1c\n" +
-	"\x02id\x18\x01 \x01(\v2\f.linea.v1.IdR\x02id\"b\n" +
+	"\rgraph_version\x18\x03 \x01(\x04R\fgraphVersion\"S\n" +
+	"\x10GetSourceRequest\x12!\n" +
+	"\fgenealogy_id\x18\x01 \x01(\tR\vgenealogyId\x12\x1c\n" +
+	"\x02id\x18\x02 \x01(\v2\f.linea.v1.IdR\x02id\"b\n" +
 	"\x11GetSourceResponse\x12(\n" +
 	"\x06source\x18\x01 \x01(\v2\x10.linea.v1.SourceR\x06source\x12#\n" +
-	"\rgraph_version\x18\x02 \x01(\x04R\fgraphVersion\"P\n" +
-	"\x12ListSourcesRequest\x12\x1b\n" +
-	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\rgraph_version\x18\x02 \x01(\x04R\fgraphVersion\"s\n" +
+	"\x12ListSourcesRequest\x12!\n" +
+	"\fgenealogy_id\x18\x01 \x01(\tR\vgenealogyId\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
-	"page_token\x18\x02 \x01(\tR\tpageToken\"\x8e\x01\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\"\x8e\x01\n" +
 	"\x13ListSourcesResponse\x12*\n" +
 	"\asources\x18\x01 \x03(\v2\x10.linea.v1.SourceR\asources\x12&\n" +
 	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12#\n" +
-	"\rgraph_version\x18\x03 \x01(\x04R\fgraphVersion2\xd0\x01\n" +
-	"\aPersons\x12d\n" +
-	"\tGetPerson\x12\x1a.linea.v1.GetPersonRequest\x1a\x1b.linea.v1.GetPersonResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/v1/persons/{id.value}\x12_\n" +
-	"\vListPersons\x12\x1c.linea.v1.ListPersonsRequest\x1a\x1d.linea.v1.ListPersonsResponse\"\x13\x82\xd3\xe4\x93\x02\r\x12\v/v1/persons2\x86\x02\n" +
-	"\rRelationships\x12|\n" +
-	"\x0fGetRelationship\x12 .linea.v1.GetRelationshipRequest\x1a!.linea.v1.GetRelationshipResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/v1/relationships/{id.value}\x12w\n" +
-	"\x11ListRelationships\x12\".linea.v1.ListRelationshipsRequest\x1a#.linea.v1.ListRelationshipsResponse\"\x19\x82\xd3\xe4\x93\x02\x13\x12\x11/v1/relationships2\xd0\x01\n" +
-	"\aSources\x12d\n" +
-	"\tGetSource\x12\x1a.linea.v1.GetSourceRequest\x1a\x1b.linea.v1.GetSourceResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/v1/sources/{id.value}\x12_\n" +
-	"\vListSources\x12\x1c.linea.v1.ListSourcesRequest\x1a\x1d.linea.v1.ListSourcesResponse\"\x13\x82\xd3\xe4\x93\x02\r\x12\v/v1/sourcesB\x97\x01\n" +
+	"\rgraph_version\x18\x03 \x01(\x04R\fgraphVersion2\xf2\x01\n" +
+	"\aPersons\x12u\n" +
+	"\tGetPerson\x12\x1a.linea.v1.GetPersonRequest\x1a\x1b.linea.v1.GetPersonResponse\"/\x82\xd3\xe4\x93\x02)\x12'/v1/g/{genealogy_id}/persons/{id.value}\x12p\n" +
+	"\vListPersons\x12\x1c.linea.v1.ListPersonsRequest\x1a\x1d.linea.v1.ListPersonsResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/v1/g/{genealogy_id}/persons2\xaa\x02\n" +
+	"\rRelationships\x12\x8d\x01\n" +
+	"\x0fGetRelationship\x12 .linea.v1.GetRelationshipRequest\x1a!.linea.v1.GetRelationshipResponse\"5\x82\xd3\xe4\x93\x02/\x12-/v1/g/{genealogy_id}/relationships/{id.value}\x12\x88\x01\n" +
+	"\x11ListRelationships\x12\".linea.v1.ListRelationshipsRequest\x1a#.linea.v1.ListRelationshipsResponse\"*\x82\xd3\xe4\x93\x02$\x12\"/v1/g/{genealogy_id}/relationships2\xf2\x01\n" +
+	"\aSources\x12u\n" +
+	"\tGetSource\x12\x1a.linea.v1.GetSourceRequest\x1a\x1b.linea.v1.GetSourceResponse\"/\x82\xd3\xe4\x93\x02)\x12'/v1/g/{genealogy_id}/sources/{id.value}\x12p\n" +
+	"\vListSources\x12\x1c.linea.v1.ListSourcesRequest\x1a\x1d.linea.v1.ListSourcesResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/v1/g/{genealogy_id}/sourcesB\x97\x01\n" +
 	"\fcom.linea.v1B\rEntitiesProtoP\x01Z7github.com/nisarul/Linea-server/gen/go/linea/v1;lineav1\xa2\x02\x03LXX\xaa\x02\bLinea.V1\xca\x02\bLinea\\V1\xe2\x02\x14Linea\\V1\\GPBMetadata\xea\x02\tLinea::V1b\x06proto3"
 
 var (

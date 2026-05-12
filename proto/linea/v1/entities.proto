@@ -7,17 +7,17 @@ import "linea/v1/common.proto";
 
 service Persons {
   rpc GetPerson  (GetPersonRequest)  returns (GetPersonResponse) {
-    option (google.api.http) = { get: "/v1/persons/{id.value}" };
+    option (google.api.http) = { get: "/v1/g/{genealogy_id}/persons/{id.value}" };
   }
   rpc ListPersons(ListPersonsRequest) returns (ListPersonsResponse) {
-    option (google.api.http) = { get: "/v1/persons" };
+    option (google.api.http) = { get: "/v1/g/{genealogy_id}/persons" };
   }
 }
 
-message GetPersonRequest  { Id id = 1; }
+message GetPersonRequest  { string genealogy_id = 1; Id id = 2; }
 message GetPersonResponse { Person person = 1; uint64 graph_version = 2; }
 
-message ListPersonsRequest  { int32 page_size = 1; string page_token = 2; }
+message ListPersonsRequest  { string genealogy_id = 1; int32 page_size = 2; string page_token = 3; }
 message ListPersonsResponse {
   repeated Person persons    = 1;
   string next_page_token     = 2;
@@ -26,17 +26,17 @@ message ListPersonsResponse {
 
 service Relationships {
   rpc GetRelationship  (GetRelationshipRequest)  returns (GetRelationshipResponse) {
-    option (google.api.http) = { get: "/v1/relationships/{id.value}" };
+    option (google.api.http) = { get: "/v1/g/{genealogy_id}/relationships/{id.value}" };
   }
   rpc ListRelationships(ListRelationshipsRequest) returns (ListRelationshipsResponse) {
-    option (google.api.http) = { get: "/v1/relationships" };
+    option (google.api.http) = { get: "/v1/g/{genealogy_id}/relationships" };
   }
 }
 
-message GetRelationshipRequest  { Id id = 1; }
+message GetRelationshipRequest  { string genealogy_id = 1; Id id = 2; }
 message GetRelationshipResponse { Relationship relationship = 1; uint64 graph_version = 2; }
 
-message ListRelationshipsRequest  { int32 page_size = 1; string page_token = 2; }
+message ListRelationshipsRequest  { string genealogy_id = 1; int32 page_size = 2; string page_token = 3; }
 message ListRelationshipsResponse {
   repeated Relationship relationships = 1;
   string next_page_token              = 2;
@@ -45,17 +45,17 @@ message ListRelationshipsResponse {
 
 service Sources {
   rpc GetSource  (GetSourceRequest)  returns (GetSourceResponse) {
-    option (google.api.http) = { get: "/v1/sources/{id.value}" };
+    option (google.api.http) = { get: "/v1/g/{genealogy_id}/sources/{id.value}" };
   }
   rpc ListSources(ListSourcesRequest) returns (ListSourcesResponse) {
-    option (google.api.http) = { get: "/v1/sources" };
+    option (google.api.http) = { get: "/v1/g/{genealogy_id}/sources" };
   }
 }
 
-message GetSourceRequest  { Id id = 1; }
+message GetSourceRequest  { string genealogy_id = 1; Id id = 2; }
 message GetSourceResponse { Source source = 1; uint64 graph_version = 2; }
 
-message ListSourcesRequest  { int32 page_size = 1; string page_token = 2; }
+message ListSourcesRequest  { string genealogy_id = 1; int32 page_size = 2; string page_token = 3; }
 message ListSourcesResponse {
   repeated Source sources    = 1;
   string next_page_token     = 2;

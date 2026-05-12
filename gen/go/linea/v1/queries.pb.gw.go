@@ -39,12 +39,21 @@ func request_Queries_FindPaths_0(ctx context.Context, marshaler runtime.Marshale
 	var (
 		protoReq FindPathsRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
 	}
 	msg, err := client.FindPaths(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -54,9 +63,18 @@ func local_request_Queries_FindPaths_0(ctx context.Context, marshaler runtime.Ma
 	var (
 		protoReq FindPathsRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
 	}
 	msg, err := server.FindPaths(ctx, &protoReq)
 	return msg, metadata, err
@@ -66,12 +84,21 @@ func request_Queries_NKCA_0(ctx context.Context, marshaler runtime.Marshaler, cl
 	var (
 		protoReq NKCARequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
 	}
 	msg, err := client.NKCA(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -81,9 +108,18 @@ func local_request_Queries_NKCA_0(ctx context.Context, marshaler runtime.Marshal
 	var (
 		protoReq NKCARequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
 	}
 	msg, err := server.NKCA(ctx, &protoReq)
 	return msg, metadata, err
@@ -101,7 +137,7 @@ func RegisterQueriesHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Queries/FindPaths", runtime.WithHTTPPathPattern("/v1/queries:findPaths"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Queries/FindPaths", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/queries:findPaths"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -121,7 +157,7 @@ func RegisterQueriesHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Queries/NKCA", runtime.WithHTTPPathPattern("/v1/queries:nkca"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Queries/NKCA", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/queries:nkca"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -179,7 +215,7 @@ func RegisterQueriesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Queries/FindPaths", runtime.WithHTTPPathPattern("/v1/queries:findPaths"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Queries/FindPaths", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/queries:findPaths"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -196,7 +232,7 @@ func RegisterQueriesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Queries/NKCA", runtime.WithHTTPPathPattern("/v1/queries:nkca"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Queries/NKCA", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/queries:nkca"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -213,8 +249,8 @@ func RegisterQueriesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 }
 
 var (
-	pattern_Queries_FindPaths_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "queries"}, "findPaths"))
-	pattern_Queries_NKCA_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "queries"}, "nkca"))
+	pattern_Queries_FindPaths_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "g", "genealogy_id", "queries"}, "findPaths"))
+	pattern_Queries_NKCA_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "g", "genealogy_id", "queries"}, "nkca"))
 )
 
 var (

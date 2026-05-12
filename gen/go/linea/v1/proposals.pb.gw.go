@@ -35,7 +35,7 @@ var (
 	_ = metadata.Join
 )
 
-var filter_Proposals_GetProposal_0 = &utilities.DoubleArray{Encoding: map[string]int{"id": 0, "value": 1}, Base: []int{1, 1, 1, 0}, Check: []int{0, 1, 2, 3}}
+var filter_Proposals_GetProposal_0 = &utilities.DoubleArray{Encoding: map[string]int{"genealogy_id": 0, "id": 1, "value": 2}, Base: []int{1, 1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 3, 2, 4}}
 
 func request_Proposals_GetProposal_0(ctx context.Context, marshaler runtime.Marshaler, client ProposalsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
@@ -46,7 +46,15 @@ func request_Proposals_GetProposal_0(ctx context.Context, marshaler runtime.Mars
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
 	}
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -70,7 +78,15 @@ func local_request_Proposals_GetProposal_0(ctx context.Context, marshaler runtim
 		metadata runtime.ServerMetadata
 		err      error
 	)
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -88,15 +104,24 @@ func local_request_Proposals_GetProposal_0(ctx context.Context, marshaler runtim
 	return msg, metadata, err
 }
 
-var filter_Proposals_ListProposals_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+var filter_Proposals_ListProposals_0 = &utilities.DoubleArray{Encoding: map[string]int{"genealogy_id": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
 
 func request_Proposals_ListProposals_0(ctx context.Context, marshaler runtime.Marshaler, client ProposalsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq ListProposalsRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
 	}
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
@@ -112,7 +137,16 @@ func local_request_Proposals_ListProposals_0(ctx context.Context, marshaler runt
 	var (
 		protoReq ListProposalsRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
@@ -127,12 +161,21 @@ func request_Proposals_CreateProposal_0(ctx context.Context, marshaler runtime.M
 	var (
 		protoReq CreateProposalRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
 	}
 	msg, err := client.CreateProposal(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -142,9 +185,18 @@ func local_request_Proposals_CreateProposal_0(ctx context.Context, marshaler run
 	var (
 		protoReq CreateProposalRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
 	}
 	msg, err := server.CreateProposal(ctx, &protoReq)
 	return msg, metadata, err
@@ -162,7 +214,15 @@ func request_Proposals_Submit_0(ctx context.Context, marshaler runtime.Marshaler
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
 	}
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -183,7 +243,15 @@ func local_request_Proposals_Submit_0(ctx context.Context, marshaler runtime.Mar
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -207,7 +275,15 @@ func request_Proposals_Claim_0(ctx context.Context, marshaler runtime.Marshaler,
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
 	}
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -228,7 +304,15 @@ func local_request_Proposals_Claim_0(ctx context.Context, marshaler runtime.Mars
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -252,7 +336,15 @@ func request_Proposals_Accept_0(ctx context.Context, marshaler runtime.Marshaler
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
 	}
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -273,7 +365,15 @@ func local_request_Proposals_Accept_0(ctx context.Context, marshaler runtime.Mar
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -297,7 +397,15 @@ func request_Proposals_Reject_0(ctx context.Context, marshaler runtime.Marshaler
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
 	}
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -318,7 +426,15 @@ func local_request_Proposals_Reject_0(ctx context.Context, marshaler runtime.Mar
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -342,7 +458,15 @@ func request_Proposals_Withdraw_0(ctx context.Context, marshaler runtime.Marshal
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
 	}
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -363,7 +487,15 @@ func local_request_Proposals_Withdraw_0(ctx context.Context, marshaler runtime.M
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	val, ok := pathParams["id.value"]
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	val, ok = pathParams["id.value"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id.value")
 	}
@@ -372,6 +504,51 @@ func local_request_Proposals_Withdraw_0(ctx context.Context, marshaler runtime.M
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id.value", err)
 	}
 	msg, err := server.Withdraw(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_Proposals_BulkReject_0(ctx context.Context, marshaler runtime.Marshaler, client ProposalsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq BulkRejectRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	msg, err := client.BulkReject(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_Proposals_BulkReject_0(ctx context.Context, marshaler runtime.Marshaler, server ProposalsServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq BulkRejectRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	val, ok := pathParams["genealogy_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "genealogy_id")
+	}
+	protoReq.GenealogyId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "genealogy_id", err)
+	}
+	msg, err := server.BulkReject(ctx, &protoReq)
 	return msg, metadata, err
 }
 
@@ -387,7 +564,7 @@ func RegisterProposalsHandlerServer(ctx context.Context, mux *runtime.ServeMux, 
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/GetProposal", runtime.WithHTTPPathPattern("/v1/proposals/{id.value}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/GetProposal", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals/{id.value}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -407,7 +584,7 @@ func RegisterProposalsHandlerServer(ctx context.Context, mux *runtime.ServeMux, 
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/ListProposals", runtime.WithHTTPPathPattern("/v1/proposals"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/ListProposals", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -427,7 +604,7 @@ func RegisterProposalsHandlerServer(ctx context.Context, mux *runtime.ServeMux, 
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/CreateProposal", runtime.WithHTTPPathPattern("/v1/proposals"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/CreateProposal", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -447,7 +624,7 @@ func RegisterProposalsHandlerServer(ctx context.Context, mux *runtime.ServeMux, 
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/Submit", runtime.WithHTTPPathPattern("/v1/proposals/{id.value}:submit"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/Submit", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals/{id.value}:submit"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -467,7 +644,7 @@ func RegisterProposalsHandlerServer(ctx context.Context, mux *runtime.ServeMux, 
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/Claim", runtime.WithHTTPPathPattern("/v1/proposals/{id.value}:claim"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/Claim", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals/{id.value}:claim"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -487,7 +664,7 @@ func RegisterProposalsHandlerServer(ctx context.Context, mux *runtime.ServeMux, 
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/Accept", runtime.WithHTTPPathPattern("/v1/proposals/{id.value}:accept"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/Accept", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals/{id.value}:accept"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -507,7 +684,7 @@ func RegisterProposalsHandlerServer(ctx context.Context, mux *runtime.ServeMux, 
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/Reject", runtime.WithHTTPPathPattern("/v1/proposals/{id.value}:reject"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/Reject", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals/{id.value}:reject"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -527,7 +704,7 @@ func RegisterProposalsHandlerServer(ctx context.Context, mux *runtime.ServeMux, 
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/Withdraw", runtime.WithHTTPPathPattern("/v1/proposals/{id.value}:withdraw"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/Withdraw", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals/{id.value}:withdraw"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -540,6 +717,26 @@ func RegisterProposalsHandlerServer(ctx context.Context, mux *runtime.ServeMux, 
 			return
 		}
 		forward_Proposals_Withdraw_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPost, pattern_Proposals_BulkReject_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/linea.v1.Proposals/BulkReject", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals:bulkReject"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_Proposals_BulkReject_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_Proposals_BulkReject_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 
 	return nil
@@ -585,7 +782,7 @@ func RegisterProposalsHandlerClient(ctx context.Context, mux *runtime.ServeMux, 
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/GetProposal", runtime.WithHTTPPathPattern("/v1/proposals/{id.value}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/GetProposal", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals/{id.value}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -602,7 +799,7 @@ func RegisterProposalsHandlerClient(ctx context.Context, mux *runtime.ServeMux, 
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/ListProposals", runtime.WithHTTPPathPattern("/v1/proposals"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/ListProposals", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -619,7 +816,7 @@ func RegisterProposalsHandlerClient(ctx context.Context, mux *runtime.ServeMux, 
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/CreateProposal", runtime.WithHTTPPathPattern("/v1/proposals"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/CreateProposal", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -636,7 +833,7 @@ func RegisterProposalsHandlerClient(ctx context.Context, mux *runtime.ServeMux, 
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/Submit", runtime.WithHTTPPathPattern("/v1/proposals/{id.value}:submit"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/Submit", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals/{id.value}:submit"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -653,7 +850,7 @@ func RegisterProposalsHandlerClient(ctx context.Context, mux *runtime.ServeMux, 
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/Claim", runtime.WithHTTPPathPattern("/v1/proposals/{id.value}:claim"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/Claim", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals/{id.value}:claim"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -670,7 +867,7 @@ func RegisterProposalsHandlerClient(ctx context.Context, mux *runtime.ServeMux, 
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/Accept", runtime.WithHTTPPathPattern("/v1/proposals/{id.value}:accept"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/Accept", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals/{id.value}:accept"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -687,7 +884,7 @@ func RegisterProposalsHandlerClient(ctx context.Context, mux *runtime.ServeMux, 
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/Reject", runtime.WithHTTPPathPattern("/v1/proposals/{id.value}:reject"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/Reject", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals/{id.value}:reject"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -704,7 +901,7 @@ func RegisterProposalsHandlerClient(ctx context.Context, mux *runtime.ServeMux, 
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/Withdraw", runtime.WithHTTPPathPattern("/v1/proposals/{id.value}:withdraw"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/Withdraw", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals/{id.value}:withdraw"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -717,18 +914,36 @@ func RegisterProposalsHandlerClient(ctx context.Context, mux *runtime.ServeMux, 
 		}
 		forward_Proposals_Withdraw_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodPost, pattern_Proposals_BulkReject_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/linea.v1.Proposals/BulkReject", runtime.WithHTTPPathPattern("/v1/g/{genealogy_id}/proposals:bulkReject"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Proposals_BulkReject_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_Proposals_BulkReject_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	return nil
 }
 
 var (
-	pattern_Proposals_GetProposal_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "proposals", "id.value"}, ""))
-	pattern_Proposals_ListProposals_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "proposals"}, ""))
-	pattern_Proposals_CreateProposal_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "proposals"}, ""))
-	pattern_Proposals_Submit_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "proposals", "id.value"}, "submit"))
-	pattern_Proposals_Claim_0          = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "proposals", "id.value"}, "claim"))
-	pattern_Proposals_Accept_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "proposals", "id.value"}, "accept"))
-	pattern_Proposals_Reject_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "proposals", "id.value"}, "reject"))
-	pattern_Proposals_Withdraw_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "proposals", "id.value"}, "withdraw"))
+	pattern_Proposals_GetProposal_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "g", "genealogy_id", "proposals", "id.value"}, ""))
+	pattern_Proposals_ListProposals_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "g", "genealogy_id", "proposals"}, ""))
+	pattern_Proposals_CreateProposal_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "g", "genealogy_id", "proposals"}, ""))
+	pattern_Proposals_Submit_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "g", "genealogy_id", "proposals", "id.value"}, "submit"))
+	pattern_Proposals_Claim_0          = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "g", "genealogy_id", "proposals", "id.value"}, "claim"))
+	pattern_Proposals_Accept_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "g", "genealogy_id", "proposals", "id.value"}, "accept"))
+	pattern_Proposals_Reject_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "g", "genealogy_id", "proposals", "id.value"}, "reject"))
+	pattern_Proposals_Withdraw_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "g", "genealogy_id", "proposals", "id.value"}, "withdraw"))
+	pattern_Proposals_BulkReject_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "g", "genealogy_id", "proposals"}, "bulkReject"))
 )
 
 var (
@@ -740,4 +955,5 @@ var (
 	forward_Proposals_Accept_0         = runtime.ForwardResponseMessage
 	forward_Proposals_Reject_0         = runtime.ForwardResponseMessage
 	forward_Proposals_Withdraw_0       = runtime.ForwardResponseMessage
+	forward_Proposals_BulkReject_0     = runtime.ForwardResponseMessage
 )

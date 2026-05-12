@@ -12,6 +12,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -20,32 +21,46 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/nisarul/Linea-core/store"
-	"github.com/nisarul/Linea-core/store/badger"
-
 	pb "github.com/nisarul/Linea-server/gen/go/linea/v1"
 	"github.com/nisarul/Linea-server/internal/auth"
+	"github.com/nisarul/Linea-server/internal/authz"
 	"github.com/nisarul/Linea-server/internal/config"
 	"github.com/nisarul/Linea-server/internal/interceptors"
+	"github.com/nisarul/Linea-server/internal/platform"
+	"github.com/nisarul/Linea-server/internal/quotas"
+	"github.com/nisarul/Linea-server/internal/ratelimit"
 	"github.com/nisarul/Linea-server/internal/service"
+	"github.com/nisarul/Linea-server/internal/tenants"
 )
 
 // Server bundles the running gRPC + HTTP listeners.
 type Server struct {
-	cfg    config.Config
-	logger *slog.Logger
-	store  *badger.Store
-	grpc   *grpc.Server
-	http   *http.Server
-	ready  atomic.Bool
+	cfg      config.Config
+	logger   *slog.Logger
+	platform *platform.Store
+	tenants  *tenants.Manager
+	grpc     *grpc.Server
+	http     *http.Server
+	ready    atomic.Bool
 }
 
-// New constructs a Server from cfg. It opens the underlying
-// Badger store; the caller MUST call Close.
+// New constructs a Server from cfg. It opens the platform store
+// and the per-genealogy TenantManager; the caller MUST call Close.
 func New(ctx context.Context, cfg config.Config, logger *slog.Logger, serverVersion string) (*Server, error) {
-	st, err := badger.Open(cfg.DataDir, badger.Silent())
+	platformDir := filepath.Join(cfg.DataDir, "platform")
+	tenantsDir := filepath.Join(cfg.DataDir, "genealogies")
+
+	pStore, err := platform.Open(platformDir)
 	if err != nil {
-		return nil, fmt.Errorf("server: open store: %w", err)
+		return nil, fmt.Errorf("server: open platform: %w", err)
+	}
+	tMgr, err := tenants.New(tenants.Config{
+		Root:    tenantsDir,
+		MaxOpen: 64,
+	})
+	if err != nil {
+		_ = pStore.Close()
+		return nil, err
 	}
 
 	var verifier *auth.Verifier
@@ -56,29 +71,52 @@ func New(ctx context.Context, cfg config.Config, logger *slog.Logger, serverVers
 			RoleClaim: cfg.RoleClaim,
 		})
 		if err != nil {
-			_ = st.Close()
+			_ = tMgr.Close()
+			_ = pStore.Close()
 			return nil, err
 		}
 	}
 
-	noAuth := map[string]bool{
-		"/linea.v1.Server/Version": false, // version still requires auth
+	authzResolver := authz.NewResolver(pStore, 5*time.Second)
+	enforcer := quotas.New(pStore, quotas.Default())
+
+	// In-process rate limiter. Per-key bucket: 60 burst, 60/sec
+	// refill (so authenticated users get one steady RPS plus a
+	// burst; anonymous IPs are limited to the same envelope).
+	// v0.3 swaps in a Redis-backed limiter so the limit becomes
+	// global across replicas.
+	rl := ratelimit.New(ratelimit.Config{
+		Capacity:        60,
+		RefillPerSecond: 60,
+	})
+
+	deps := &service.PlatformDeps{
+		Platform: pStore,
+		Authz:    authzResolver,
+		Tenants:  tMgr,
+		Quotas:   enforcer,
 	}
-	roleMap := buildRoleMap()
+
+	noAuth := map[string]bool{
+		// Server.Version is callable without auth so health
+		// checks and version probes don't need a token.
+		"/linea.v1.Server/Version": true,
+	}
+	roleMap := buildLegacyRoleMap()
 
 	grpcSrv := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			interceptors.LoggingInterceptor(logger),
 			interceptors.AuthInterceptor(verifier, noAuth),
+			interceptors.RateLimitInterceptor(rl, interceptors.SubjectOrPeerKey),
 			interceptors.RoleInterceptor(roleMap),
 			interceptors.ErrorInterceptor(),
 		),
 	)
-	registerServices(grpcSrv, st, serverVersion)
+	registerServices(grpcSrv, deps, serverVersion)
 
 	mux := runtime.NewServeMux(
 		runtime.WithIncomingHeaderMatcher(func(key string) (string, bool) {
-			// Pass through Authorization so the AuthInterceptor sees it.
 			if strings.EqualFold(key, "authorization") {
 				return key, true
 			}
@@ -86,31 +124,32 @@ func New(ctx context.Context, cfg config.Config, logger *slog.Logger, serverVers
 		}),
 	)
 	if err := registerHandlers(ctx, mux, cfg.GRPCAddr); err != nil {
-		_ = st.Close()
+		_ = tMgr.Close()
+		_ = pStore.Close()
 		return nil, err
 	}
-	httpHandler := withHealth(mux, &Server{}) // placeholder, set after construct
 
 	srv := &Server{
-		cfg:    cfg,
-		logger: logger,
-		store:  st,
-		grpc:   grpcSrv,
+		cfg:      cfg,
+		logger:   logger,
+		platform: pStore,
+		tenants:  tMgr,
+		grpc:     grpcSrv,
 		http: &http.Server{
 			Addr:              cfg.HTTPAddr,
-			Handler:           httpHandler,
 			ReadHeaderTimeout: 5 * time.Second,
 		},
 	}
-	// Replace placeholder with real probes wired to srv.
 	srv.http.Handler = withHealth(mux, srv)
 	return srv, nil
 }
 
-// Store returns the underlying store, primarily for tests.
-func (s *Server) Store() store.Store { return s.store }
+// Platform exposes the platform store, primarily for tests.
+func (s *Server) Platform() *platform.Store { return s.platform }
 
-// Close releases all resources.
+// Tenants exposes the tenant manager, primarily for tests.
+func (s *Server) Tenants() *tenants.Manager { return s.tenants }
+
 func (s *Server) Close() error {
 	var errs []error
 	if s.grpc != nil {
@@ -123,15 +162,19 @@ func (s *Server) Close() error {
 		}
 		cancel()
 	}
-	if s.store != nil {
-		if err := s.store.Close(); err != nil {
+	if s.tenants != nil {
+		if err := s.tenants.Close(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if s.platform != nil {
+		if err := s.platform.Close(); err != nil {
 			errs = append(errs, err)
 		}
 	}
 	return errors.Join(errs...)
 }
 
-// Run starts both listeners and blocks until ctx is cancelled.
 func (s *Server) Run(ctx context.Context) error {
 	grpcLn, err := net.Listen("tcp", s.cfg.GRPCAddr)
 	if err != nil {
@@ -162,83 +205,90 @@ func (s *Server) Run(ctx context.Context) error {
 	}
 }
 
-func registerServices(g *grpc.Server, st store.Store, serverVersion string) {
-	pb.RegisterServerServer(g, &service.ServerService{Store: st, ServerVersion: serverVersion})
-	pb.RegisterPersonsServer(g, &service.PersonsService{Store: st})
-	pb.RegisterRelationshipsServer(g, &service.RelationshipsService{Store: st})
-	pb.RegisterSourcesServer(g, &service.SourcesService{Store: st})
-	pb.RegisterProposalsServer(g, &service.ProposalsService{Store: st})
-	pb.RegisterQueriesServer(g, &service.QueriesService{Store: st})
+func registerServices(g *grpc.Server, deps *service.PlatformDeps, serverVersion string) {
+	pb.RegisterServerServer(g, &service.ServerService{ServerVersion: serverVersion})
+	pb.RegisterPersonsServer(g, service.NewPersonsService(deps))
+	pb.RegisterRelationshipsServer(g, service.NewRelationshipsService(deps))
+	pb.RegisterSourcesServer(g, service.NewSourcesService(deps))
+	pb.RegisterProposalsServer(g, service.NewProposalsService(deps))
+	pb.RegisterQueriesServer(g, service.NewQueriesService(deps))
+	pb.RegisterGenealogiesServer(g, service.NewGenealogiesService(deps))
 }
 
-// registerHandlers wires the grpc-gateway REST mux to dial back
-// into the local gRPC server. Inter-process loopback dial keeps
-// the two surfaces share the same interceptor chain (auth, role,
-// logging) without duplicating handler code.
 func registerHandlers(ctx context.Context, mux *runtime.ServeMux, grpcAddr string) error {
 	dial := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	endpoint := grpcAddr
 	if strings.HasPrefix(endpoint, ":") {
 		endpoint = "127.0.0.1" + endpoint
 	}
-	if err := pb.RegisterServerHandlerFromEndpoint(ctx, mux, endpoint, dial); err != nil {
-		return fmt.Errorf("gateway: register Server: %w", err)
+	regs := []func(context.Context, *runtime.ServeMux, string, []grpc.DialOption) error{
+		pb.RegisterServerHandlerFromEndpoint,
+		pb.RegisterPersonsHandlerFromEndpoint,
+		pb.RegisterRelationshipsHandlerFromEndpoint,
+		pb.RegisterSourcesHandlerFromEndpoint,
+		pb.RegisterProposalsHandlerFromEndpoint,
+		pb.RegisterQueriesHandlerFromEndpoint,
+		pb.RegisterGenealogiesHandlerFromEndpoint,
 	}
-	if err := pb.RegisterPersonsHandlerFromEndpoint(ctx, mux, endpoint, dial); err != nil {
-		return fmt.Errorf("gateway: register Persons: %w", err)
-	}
-	if err := pb.RegisterRelationshipsHandlerFromEndpoint(ctx, mux, endpoint, dial); err != nil {
-		return fmt.Errorf("gateway: register Relationships: %w", err)
-	}
-	if err := pb.RegisterSourcesHandlerFromEndpoint(ctx, mux, endpoint, dial); err != nil {
-		return fmt.Errorf("gateway: register Sources: %w", err)
-	}
-	if err := pb.RegisterProposalsHandlerFromEndpoint(ctx, mux, endpoint, dial); err != nil {
-		return fmt.Errorf("gateway: register Proposals: %w", err)
-	}
-	if err := pb.RegisterQueriesHandlerFromEndpoint(ctx, mux, endpoint, dial); err != nil {
-		return fmt.Errorf("gateway: register Queries: %w", err)
+	for _, r := range regs {
+		if err := r(ctx, mux, endpoint, dial); err != nil {
+			return fmt.Errorf("gateway: register: %w", err)
+		}
 	}
 	return nil
 }
 
-// buildRoleMap declares the minimum role required per RPC.
+// buildLegacyRoleMap restricts the broad RPCs by required global
+// "Linea role" mapped from the JWT (Viewer/Contributor/Curator).
 //
-// CCGGS §8.1:
-//
-//	Viewer       — Get*, List*, Queries.*, Server.*
-//	Contributor  — + Proposals.CreateProposal, Submit, Withdraw
-//	Curator      — + Proposals.Claim, Accept, Reject
-func buildRoleMap() map[string]auth.Role {
+// Per-genealogy Owner/Curator/Contributor/Viewer enforcement
+// happens INSIDE each handler via authz.Resolver — this is only
+// the coarse "is this user authenticated and not zero-roled" gate.
+func buildLegacyRoleMap() map[string]auth.Role {
 	const (
-		serverPfx       = "/linea.v1.Server/"
 		personsPfx      = "/linea.v1.Persons/"
-		relationshipsP  = "/linea.v1.Relationships/"
+		relationshipsPx = "/linea.v1.Relationships/"
 		sourcesPfx      = "/linea.v1.Sources/"
 		queriesPfx      = "/linea.v1.Queries/"
 		proposalsPfx    = "/linea.v1.Proposals/"
+		genealogiesPfx  = "/linea.v1.Genealogies/"
 	)
+	// All read RPCs require at least Viewer; mutation RPCs require
+	// Contributor; the genealogy CRUD service also requires
+	// Contributor at the global level (per-genealogy enforcement
+	// is the real gate).
+	//
+	// Server.Version is intentionally absent from this map: it is
+	// also in the noAuth set, so no Identity is present at this
+	// point and the role interceptor passes the call through.
 	m := map[string]auth.Role{
-		// Viewer reads
-		serverPfx + "Version":             auth.RoleViewer,
-		personsPfx + "GetPerson":          auth.RoleViewer,
-		personsPfx + "ListPersons":        auth.RoleViewer,
-		relationshipsP + "GetRelationship":   auth.RoleViewer,
-		relationshipsP + "ListRelationships": auth.RoleViewer,
-		sourcesPfx + "GetSource":          auth.RoleViewer,
-		sourcesPfx + "ListSources":        auth.RoleViewer,
-		queriesPfx + "FindPaths":          auth.RoleViewer,
-		queriesPfx + "NKCA":               auth.RoleViewer,
-		proposalsPfx + "GetProposal":      auth.RoleViewer,
-		proposalsPfx + "ListProposals":    auth.RoleViewer,
-		// Contributor writes
-		proposalsPfx + "CreateProposal":   auth.RoleContributor,
-		proposalsPfx + "Submit":           auth.RoleContributor,
-		proposalsPfx + "Withdraw":         auth.RoleContributor,
-		// Curator decisions
-		proposalsPfx + "Claim":            auth.RoleCurator,
-		proposalsPfx + "Accept":           auth.RoleCurator,
-		proposalsPfx + "Reject":           auth.RoleCurator,
+		personsPfx + "GetPerson":             auth.RoleViewer,
+		personsPfx + "ListPersons":           auth.RoleViewer,
+		relationshipsPx + "GetRelationship":   auth.RoleViewer,
+		relationshipsPx + "ListRelationships": auth.RoleViewer,
+		sourcesPfx + "GetSource":             auth.RoleViewer,
+		sourcesPfx + "ListSources":           auth.RoleViewer,
+		queriesPfx + "FindPaths":             auth.RoleViewer,
+		queriesPfx + "NKCA":                  auth.RoleViewer,
+		proposalsPfx + "GetProposal":         auth.RoleViewer,
+		proposalsPfx + "ListProposals":       auth.RoleViewer,
+		proposalsPfx + "CreateProposal":      auth.RoleContributor,
+		proposalsPfx + "Submit":              auth.RoleContributor,
+		proposalsPfx + "Withdraw":            auth.RoleContributor,
+		proposalsPfx + "Claim":               auth.RoleContributor,
+		proposalsPfx + "Accept":              auth.RoleContributor,
+		proposalsPfx + "Reject":              auth.RoleContributor,
+		genealogiesPfx + "ListGenealogies":   auth.RoleViewer,
+		genealogiesPfx + "GetGenealogy":      auth.RoleViewer,
+		genealogiesPfx + "ListMembers":       auth.RoleViewer,
+		genealogiesPfx + "CreateGenealogy":   auth.RoleContributor,
+		genealogiesPfx + "UpdateVisibility":  auth.RoleContributor,
+		genealogiesPfx + "DeleteGenealogy":   auth.RoleContributor,
+		genealogiesPfx + "UpsertMembership":  auth.RoleContributor,
+		genealogiesPfx + "RemoveMember":      auth.RoleContributor,
+		genealogiesPfx + "LeaveGenealogy":    auth.RoleContributor,
+		genealogiesPfx + "BanUser":           auth.RoleContributor,
+		genealogiesPfx + "UnbanUser":         auth.RoleContributor,
 	}
 	return m
 }
