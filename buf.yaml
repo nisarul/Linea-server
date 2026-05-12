@@ -1,0 +1,21 @@
+version: v2
+modules:
+  - path: proto
+deps:
+  - buf.build/googleapis/googleapis
+lint:
+  use:
+    - STANDARD
+  except:
+    # Linea uses concise service names (Persons, Queries, ...) without the
+    # "Service" suffix. The collection-noun naming reads better at the call
+    # site (`PersonsServer`, `QueriesServer` would be redundant).
+    - SERVICE_SUFFIX
+    # Lifecycle RPCs (Submit/Claim/Accept/Reject/Withdraw) all share the
+    # same TransitionRequest. The shared shape is intentional.
+    - RPC_REQUEST_STANDARD_NAME
+    - RPC_RESPONSE_STANDARD_NAME
+    - RPC_REQUEST_RESPONSE_UNIQUE
+breaking:
+  use:
+    - FILE

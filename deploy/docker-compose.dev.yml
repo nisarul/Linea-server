@@ -1,0 +1,54 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Local development stack: Keycloak (dev mode) + lineasrv with OIDC enabled.
+#
+# Usage:
+#   docker compose -f docker-compose.dev.yml up
+# Then login at http://localhost:8089 (admin / admin) to manage realm.
+# A pre-baked realm "linea" is imported with three demo users:
+#   viewer   / viewer   (Viewer role)
+#   author   / author   (Contributor role)
+#   curator  / curator  (Curator role)
+
+version: "3.9"
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: "8080"
+    ports:
+      - "8089:8080"
+    volumes:
+      - ./keycloak/realm-linea.json:/opt/keycloak/data/import/realm-linea.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080 && echo -e 'GET /realms/linea HTTP/1.0\\r\\n\\r\\n' >&3 && cat <&3 | head -1 | grep -q '200 OK'"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+
+  lineasrv:
+    build:
+      context: ..
+      dockerfile: deploy/Containerfile
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    environment:
+      LINEA_AUTH_MODE: oidc
+      LINEA_OIDC_ISSUER: http://keycloak:8080/realms/linea
+      LINEA_OIDC_AUDIENCE: linea-cli
+      LINEA_OIDC_ROLE_CLAIM: groups
+      LINEA_LOG_LEVEL: info
+    ports:
+      - "8080:8080"   # REST gateway
+      - "9090:9090"   # gRPC
+    volumes:
+      - lineadata:/data
+
+volumes:
+  lineadata: {}

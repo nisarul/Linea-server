@@ -1,0 +1,166 @@
+syntax = "proto3";
+
+package linea.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Certainty per CCGGS §6.1.
+enum Certainty {
+  CERTAINTY_UNSPECIFIED = 0;
+  CERTAINTY_UNCERTAIN   = 1;
+  CERTAINTY_PROBABLE    = 2;
+  CERTAINTY_CERTAIN     = 3;
+}
+
+// ContinuityState per CCGGS §6.2.
+enum ContinuityState {
+  CONTINUITY_STATE_UNSPECIFIED = 0;
+  CONTINUITY_STATE_CONTINUOUS  = 1;
+  CONTINUITY_STATE_GAPPED      = 2;
+}
+
+// Continuity bundles state with the gap descriptor.
+message Continuity {
+  ContinuityState state = 1;
+  // Only meaningful when state == GAPPED.
+  bool gap_known_size = 2;
+  // Number of intermediate generations (>=1). Only meaningful when
+  // gap_known_size == true.
+  int32 gap_size = 3;
+}
+
+// RelationshipType per CCGGS §5.1. Only these two primitives may
+// be carried on the wire.
+enum RelationshipType {
+  RELATIONSHIP_TYPE_UNSPECIFIED  = 0;
+  RELATIONSHIP_TYPE_PARENT_CHILD = 1;
+  RELATIONSHIP_TYPE_MARRIAGE     = 2;
+}
+
+// PathClassification per CCGGS §9.5.
+enum PathClassification {
+  PATH_CLASSIFICATION_UNSPECIFIED = 0;
+  PATH_CLASSIFICATION_LINEAGE     = 1;
+  PATH_CLASSIFICATION_AFFINAL     = 2;
+}
+
+// Stable, opaque identifier of any Linea entity.
+message Id {
+  string value = 1;
+}
+
+// One of possibly many names for a Person (CCGGS §4.2).
+message Name {
+  string text      = 1;
+  string language  = 2;
+  string script    = 3;
+  string type      = 4; // given | family | full | kunyah | title | epithet | other
+  bool   preferred = 5;
+}
+
+// TimeRange per CCGGS §11.2.
+message TimeRange {
+  bool   earliest_known = 1;
+  int32  earliest_year  = 2;
+  bool   latest_known   = 3;
+  int32  latest_year    = 4;
+  string calendar       = 5; // gregorian-proleptic | julian | hijri | ...
+  bool   circa          = 6;
+}
+
+// Person (CCGGS §4). May be an unknown-ancestor placeholder
+// (CCGGS §5.3) — in which case all substantive fields MUST be empty.
+message Person {
+  Id            id                  = 1;
+  bool          unknown_ancestor    = 2;
+  repeated Name names               = 3;
+  string        gender              = 4; // male | female | unknown | extension
+  TimeRange     birth               = 5;
+  TimeRange     death               = 6;
+  string        notes               = 7;
+}
+
+// Relationship (CCGGS §5).
+message Relationship {
+  Id               id          = 1;
+  Id               from_person = 2;
+  Id               to_person   = 3;
+  RelationshipType type        = 4;
+  Certainty        certainty   = 5;
+  Continuity       continuity  = 6;
+  TimeRange        time_range  = 7;
+  string           notes       = 8;
+  repeated Id      sources     = 9;
+}
+
+// SourceType per CCGGS §7.1.
+enum SourceType {
+  SOURCE_TYPE_UNSPECIFIED = 0;
+  SOURCE_TYPE_PRIMARY     = 1;
+  SOURCE_TYPE_SECONDARY   = 2;
+  SOURCE_TYPE_ORAL        = 3;
+  SOURCE_TYPE_DERIVED     = 4;
+  SOURCE_TYPE_OTHER       = 5;
+}
+
+// Source as a first-class entity (CCGGS §7).
+message Source {
+  Id         id       = 1;
+  SourceType type     = 2;
+  string     citation = 3;
+  string     author   = 4;
+  string     title    = 5;
+  string     date     = 6;
+  string     locator  = 7;
+  string     notes    = 8;
+}
+
+// ProposalState per CCGGS §8.3.
+enum ProposalState {
+  PROPOSAL_STATE_UNSPECIFIED  = 0;
+  PROPOSAL_STATE_DRAFT        = 1;
+  PROPOSAL_STATE_SUBMITTED    = 2;
+  PROPOSAL_STATE_UNDER_REVIEW = 3;
+  PROPOSAL_STATE_ACCEPTED     = 4;
+  PROPOSAL_STATE_REJECTED     = 5;
+  PROPOSAL_STATE_WITHDRAWN    = 6;
+}
+
+enum ProposalAction {
+  PROPOSAL_ACTION_UNSPECIFIED   = 0;
+  PROPOSAL_ACTION_CREATE        = 1;
+  PROPOSAL_ACTION_UPDATE        = 2;
+  PROPOSAL_ACTION_RETRACT       = 3;
+  PROPOSAL_ACTION_MERGE         = 4;
+  PROPOSAL_ACTION_SAME_AS_LINK  = 5;
+}
+
+enum EntityKind {
+  ENTITY_KIND_UNSPECIFIED  = 0;
+  ENTITY_KIND_PERSON       = 1;
+  ENTITY_KIND_RELATIONSHIP = 2;
+  ENTITY_KIND_SOURCE       = 3;
+}
+
+message ProposalTransition {
+  ProposalState from      = 1;
+  ProposalState to        = 2;
+  string        actor     = 3;
+  google.protobuf.Timestamp at = 4;
+  string        reason    = 5;
+}
+
+message Proposal {
+  Id                          id            = 1;
+  ProposalState               state         = 2;
+  ProposalAction              action        = 3;
+  EntityKind                  entity_kind   = 4;
+  Id                          target_id     = 5;
+  Id                          secondary_id  = 6;
+  bytes                       payload       = 7; // opaque, schema per action+kind
+  string                      reason        = 8;
+  repeated Id                 sources       = 9;
+  string                      author        = 10;
+  google.protobuf.Timestamp   created_at    = 11;
+  repeated ProposalTransition history       = 12;
+}

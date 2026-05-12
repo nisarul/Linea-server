@@ -1,0 +1,30 @@
+# Binaries
+*.exe
+*.exe~
+bin/
+dist/
+/lineasrv
+/cmd/lineasrv/lineasrv
+
+# Test
+*.test
+*.out
+coverage
+coverage.out
+coverage.html
+
+# Generated proto code is committed; we still ignore staging
+.proto-tmp/
+
+# Local data dirs used by dev/smoke
+.devdata/
+.smoketest*/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package linea.v1;
+
+import "google/api/annotations.proto";
+import "linea/v1/common.proto";
+
+// Proposals service is the only path through which the graph may
+// be mutated (CCGGS §8). There are no direct PUT* RPCs by design.
+service Proposals {
+  rpc GetProposal   (GetProposalRequest)    returns (GetProposalResponse) {
+    option (google.api.http) = { get: "/v1/proposals/{id.value}" };
+  }
+  rpc ListProposals (ListProposalsRequest)  returns (ListProposalsResponse) {
+    option (google.api.http) = { get: "/v1/proposals" };
+  }
+
+  // Create a Draft proposal.
+  rpc CreateProposal(CreateProposalRequest) returns (CreateProposalResponse) {
+    option (google.api.http) = {
+      post: "/v1/proposals"
+      body: "*"
+    };
+  }
+
+  // Lifecycle transitions. See CCGGS §8.3.
+  rpc Submit  (TransitionRequest) returns (Proposal) {
+    option (google.api.http) = { post: "/v1/proposals/{id.value}:submit"  body: "*" };
+  }
+  rpc Claim   (TransitionRequest) returns (Proposal) {
+    option (google.api.http) = { post: "/v1/proposals/{id.value}:claim"   body: "*" };
+  }
+  rpc Accept  (TransitionRequest) returns (Proposal) {
+    option (google.api.http) = { post: "/v1/proposals/{id.value}:accept"  body: "*" };
+  }
+  rpc Reject  (TransitionRequest) returns (Proposal) {
+    option (google.api.http) = { post: "/v1/proposals/{id.value}:reject"  body: "*" };
+  }
+  rpc Withdraw(TransitionRequest) returns (Proposal) {
+    option (google.api.http) = { post: "/v1/proposals/{id.value}:withdraw" body: "*" };
+  }
+}
+
+message GetProposalRequest  { Id id = 1; }
+message GetProposalResponse { Proposal proposal = 1; uint64 graph_version = 2; }
+
+message ListProposalsRequest  {
+  int32 page_size = 1;
+  string page_token = 2;
+  // Optional state filter.
+  ProposalState state_filter = 3;
+}
+message ListProposalsResponse {
+  repeated Proposal proposals = 1;
+  string next_page_token      = 2;
+  uint64 graph_version        = 3;
+}
+
+message CreateProposalRequest {
+  ProposalAction action      = 1;
+  EntityKind     entity_kind = 2;
+  Id             target_id   = 3;
+  Id             secondary_id = 4;
+  bytes          payload     = 5;
+  string         reason      = 6;
+  repeated Id    sources     = 7;
+}
+message CreateProposalResponse { Proposal proposal = 1; uint64 graph_version = 2; }
+
+message TransitionRequest {
+  Id     id     = 1;
+  // Required for Reject; optional otherwise.
+  string reason = 2;
+}

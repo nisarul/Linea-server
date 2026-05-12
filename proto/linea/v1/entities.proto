@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package linea.v1;
+
+import "google/api/annotations.proto";
+import "linea/v1/common.proto";
+
+service Persons {
+  rpc GetPerson  (GetPersonRequest)  returns (GetPersonResponse) {
+    option (google.api.http) = { get: "/v1/persons/{id.value}" };
+  }
+  rpc ListPersons(ListPersonsRequest) returns (ListPersonsResponse) {
+    option (google.api.http) = { get: "/v1/persons" };
+  }
+}
+
+message GetPersonRequest  { Id id = 1; }
+message GetPersonResponse { Person person = 1; uint64 graph_version = 2; }
+
+message ListPersonsRequest  { int32 page_size = 1; string page_token = 2; }
+message ListPersonsResponse {
+  repeated Person persons    = 1;
+  string next_page_token     = 2;
+  uint64 graph_version       = 3;
+}
+
+service Relationships {
+  rpc GetRelationship  (GetRelationshipRequest)  returns (GetRelationshipResponse) {
+    option (google.api.http) = { get: "/v1/relationships/{id.value}" };
+  }
+  rpc ListRelationships(ListRelationshipsRequest) returns (ListRelationshipsResponse) {
+    option (google.api.http) = { get: "/v1/relationships" };
+  }
+}
+
+message GetRelationshipRequest  { Id id = 1; }
+message GetRelationshipResponse { Relationship relationship = 1; uint64 graph_version = 2; }
+
+message ListRelationshipsRequest  { int32 page_size = 1; string page_token = 2; }
+message ListRelationshipsResponse {
+  repeated Relationship relationships = 1;
+  string next_page_token              = 2;
+  uint64 graph_version                = 3;
+}
+
+service Sources {
+  rpc GetSource  (GetSourceRequest)  returns (GetSourceResponse) {
+    option (google.api.http) = { get: "/v1/sources/{id.value}" };
+  }
+  rpc ListSources(ListSourcesRequest) returns (ListSourcesResponse) {
+    option (google.api.http) = { get: "/v1/sources" };
+  }
+}
+
+message GetSourceRequest  { Id id = 1; }
+message GetSourceResponse { Source source = 1; uint64 graph_version = 2; }
+
+message ListSourcesRequest  { int32 page_size = 1; string page_token = 2; }
+message ListSourcesResponse {
+  repeated Source sources    = 1;
+  string next_page_token     = 2;
+  uint64 graph_version       = 3;
+}

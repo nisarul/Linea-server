@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package linea.v1;
+
+import "google/api/annotations.proto";
+import "linea/v1/common.proto";
+
+// Server reports build metadata and the spec version it conforms to.
+service Server {
+  rpc Version(VersionRequest) returns (VersionResponse) {
+    option (google.api.http) = { get: "/v1/version" };
+  }
+}
+
+message VersionRequest {}
+message VersionResponse {
+  string spec_version   = 1;
+  string server_version = 2;
+  uint64 graph_version  = 3;
+  string tenant_id      = 4;
+}

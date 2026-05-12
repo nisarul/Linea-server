@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package linea.v1;
+
+import "google/api/annotations.proto";
+import "linea/v1/common.proto";
+
+service Queries {
+  // Find ranked genealogical paths between two persons (CCGGS §9.3).
+  rpc FindPaths(FindPathsRequest) returns (FindPathsResponse) {
+    option (google.api.http) = {
+      post: "/v1/queries:findPaths"
+      body: "*"
+    };
+  }
+  // Nearest known common ancestor (CCGGS §9.6).
+  rpc NKCA(NKCARequest) returns (NKCAResponse) {
+    option (google.api.http) = {
+      post: "/v1/queries:nkca"
+      body: "*"
+    };
+  }
+}
+
+message FindPathsRequest {
+  Id    from            = 1;
+  Id    to              = 2;
+  int32 max_depth       = 3;
+  int32 max_paths       = 4;
+  bool  include_affinal = 5;
+}
+
+message Step {
+  Id               from_person = 1;
+  Id               to_person   = 2;
+  Id               relationship_id = 3;
+  RelationshipType type        = 4;
+  Certainty        certainty   = 5;
+  Continuity       continuity  = 6;
+  // true iff this is the first edge whose certainty equals the
+  // path's overall (weakest-link) certainty.
+  bool             is_weakest_link = 7;
+  repeated Id      sources     = 8;
+}
+
+message Path {
+  Id                 from                   = 1;
+  Id                 to                     = 2;
+  int32              length                 = 3;
+  Certainty          certainty              = 4;
+  int32              total_gap_generations  = 5;
+  int32              gap_edge_count         = 6;
+  PathClassification classification         = 7;
+  repeated Step      steps                  = 8;
+  uint64             graph_version          = 9;
+}
+
+message FindPathsResponse {
+  repeated Path paths        = 1;
+  uint64        graph_version = 2;
+}
+
+message NKCARequest { Id a = 1; Id b = 2; }
+
+message NKCAResponse {
+  Id        ancestor_id          = 1;
+  bool      ancestor_is_unknown  = 2;
+  int32     total_generations    = 3;
+  Certainty combined_certainty   = 4;
+  Path      path_from_a          = 5;
+  Path      path_from_b          = 6;
+  uint64    graph_version        = 7;
+}
