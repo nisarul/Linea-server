@@ -281,14 +281,25 @@ func buildLegacyRoleMap() map[string]auth.Role {
 		genealogiesPfx + "ListGenealogies":   auth.RoleViewer,
 		genealogiesPfx + "GetGenealogy":      auth.RoleViewer,
 		genealogiesPfx + "ListMembers":       auth.RoleViewer,
-		genealogiesPfx + "CreateGenealogy":   auth.RoleContributor,
-		genealogiesPfx + "UpdateVisibility":  auth.RoleContributor,
-		genealogiesPfx + "DeleteGenealogy":   auth.RoleContributor,
-		genealogiesPfx + "UpsertMembership":  auth.RoleContributor,
-		genealogiesPfx + "RemoveMember":      auth.RoleContributor,
-		genealogiesPfx + "LeaveGenealogy":    auth.RoleContributor,
-		genealogiesPfx + "BanUser":           auth.RoleContributor,
-		genealogiesPfx + "UnbanUser":         auth.RoleContributor,
+		// CreateGenealogy is the entry point for anyone authenticated:
+		// the creator becomes the Owner of the new genealogy. The
+		// per-genealogy Owner/Curator/Contributor/Viewer model is what
+		// gates everything else; there is no global "may create"
+		// privilege beyond being signed in.
+		genealogiesPfx + "CreateGenealogy":   auth.RoleViewer,
+		// LeaveGenealogy is self-service; you can always leave a
+		// group you're a member of.
+		genealogiesPfx + "LeaveGenealogy":    auth.RoleViewer,
+		// The remaining genealogy management RPCs only make sense
+		// from inside an existing genealogy and are gated per-tenant
+		// by authz.Resolver inside the handler (Owner/Curator).
+		// Keeping the global gate at Viewer means "authenticated".
+		genealogiesPfx + "UpdateVisibility":  auth.RoleViewer,
+		genealogiesPfx + "DeleteGenealogy":   auth.RoleViewer,
+		genealogiesPfx + "UpsertMembership":  auth.RoleViewer,
+		genealogiesPfx + "RemoveMember":      auth.RoleViewer,
+		genealogiesPfx + "BanUser":           auth.RoleViewer,
+		genealogiesPfx + "UnbanUser":         auth.RoleViewer,
 	}
 	return m
 }
