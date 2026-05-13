@@ -66,9 +66,9 @@ func New(ctx context.Context, cfg config.Config, logger *slog.Logger, serverVers
 	var verifier *auth.Verifier
 	if !cfg.AuthDisabled() {
 		verifier, err = auth.NewVerifier(ctx, auth.Config{
-			IssuerURL: cfg.OIDCIssuer,
-			Audience:  cfg.OIDCAud,
-			RoleClaim: cfg.RoleClaim,
+			IssuerURLs: cfg.OIDCIssuers,
+			Audiences:  cfg.OIDCAudiences,
+			RoleClaim:  cfg.RoleClaim,
 		})
 		if err != nil {
 			_ = tMgr.Close()
