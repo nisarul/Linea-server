@@ -203,17 +203,19 @@ func (v *Verifier) VerifyToken(ctx context.Context, raw string) (Identity, error
 }
 
 // resolveRole walks Config.RoleClaim in claims and returns the
-// highest Role found. Falls back to RoleViewer if the claim is
-// present but contains no recognised value, or RoleNone if the
-// claim is absent (which interceptors will treat as unauthorised).
+// highest Role found. Any authenticated user gets at least
+// RoleViewer; the role claim only upgrades them to Contributor
+// or Curator. This matches the principle that authentication
+// alone confers read access; mutating actions require an
+// explicit role grant in the IdP.
 func (v *Verifier) resolveRole(claims map[string]any) Role {
 	raw, ok := claims[v.cfg.RoleClaim]
 	if !ok {
-		return RoleNone
+		return RoleViewer
 	}
 	values := flattenRoleValues(raw)
 	if len(values) == 0 {
-		return RoleNone
+		return RoleViewer
 	}
 	best := RoleNone
 	for _, val := range values {
@@ -222,10 +224,6 @@ func (v *Verifier) resolveRole(claims map[string]any) Role {
 		}
 	}
 	if best == RoleNone {
-		// Claim present but no recognised values — treat as the
-		// least-privileged authenticated role so the user at least
-		// gets read access. Operators can tighten this by leaving
-		// the role-claim absent in their identity provider.
 		return RoleViewer
 	}
 	return best
